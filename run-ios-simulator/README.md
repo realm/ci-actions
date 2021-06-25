@@ -1,7 +1,7 @@
 # Run an iOS application in a simulator
 This github action helps with running an iOS application on a simulator in a Github runner.
 
-You can add this action to your GitHub workflow for Ubuntu runners (e.g. `runs-on: ubuntu-latest`) as follows:
+This action can run on any Github runner and it can be added to a GitHub workflow as follows:
 
 ```yaml
 - name: Run iOS application
@@ -25,4 +25,4 @@ The action takes the following parameters:
 ![macOS badge](https://badgen.net/badge/icon/macOS?icon=apple&label)
 ![Windows badge](https://badgen.net/badge/icon/Windows?icon=windows&label)
 
-[![GitHub release badge](https://badgen.net/github/release/realm/ci/run-ios-simulator/stable)](https://github.com/realm/ci/run-ios-simulator/releases/latest)
+[![GitHub release badge](https://badgen.net/github/release/realm/ci-actions/run-ios-simulator/stable)](https://github.com/realm/ci-actions/releases/latest)
