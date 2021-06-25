@@ -25,4 +25,4 @@ The action takes the following parameters:
 ![macOS badge](https://badgen.net/badge/icon/macOS?icon=apple&label)
 ![Windows badge](https://badgen.net/badge/icon/Windows?icon=windows&label)
 
-[![GitHub release badge](https://badgen.net/github/release/realm/ci-actions/run-ios-simulator/stable)](https://github.com/realm/ci-actions/releases/latest)
+[![GitHub release badge](https://badgen.net/github/release/realm/ci-actions/run-ios-simulator)](https://github.com/realm/ci-actions/releases/latest)
