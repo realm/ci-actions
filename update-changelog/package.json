@@ -1,7 +1,6 @@
 {
   "name": "update-changelog",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
   "description": "Update the changelog and infer the correct version",
   "main": "lib/src/main.js",
   "scripts": {
@@ -15,7 +14,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/realm/realm-dotnet.git"
+    "url": "git+https://github.com/realm/ci-actions.git"
   },
   "keywords": [
     "actions",

@@ -11,21 +11,27 @@ export function processChangelog(changelog: string): { updatedChangelog: string;
 
     const changelogMatch = changelogRegex.exec(changelog);
     if (!changelogMatch || !changelogMatch.groups) {
-        throw new Error("Failed to match changelog");
+        throw new Error(`Failed to match changelog: ${changelog}`);
     }
 
     const prevVersion = changelogMatch.groups["prevVersion"];
     let newVersion = prevVersion;
-    if (semver.parse(prevVersion)?.prerelease?.length) {
+
+    const parsedPrevVersion = semver.parse(prevVersion);
+    if (!parsedPrevVersion) {
+        throw new Error(`Failed to parse previous version: ${prevVersion}`);
+    }
+    if (parsedPrevVersion.prerelease.length) {
         newVersion = semver.inc(prevVersion, "prerelease")!;
     } else {
         let sectionMatch: RegExpExecArray | null;
         while ((sectionMatch = sectionsRegex.exec(changelogMatch.groups["sections"]))) {
             if (!sectionMatch.groups) {
-                throw new Error("Failed to match sections");
+                throw new Error(`Failed to match sections: ${changelogMatch.groups["sections"]}`);
             }
 
-            if (!hasActualChanges(sectionMatch)) {
+            if (!hasActualChanges(sectionMatch.groups["sectionContent"])) {
+                // If the section doesn't have changes - i.e. it contains `* None`, remove it altogether
                 changelog = changelog.replace(sectionMatch[0], "");
                 continue;
             }
@@ -57,8 +63,7 @@ export async function updateChangelogContent(path: string): Promise<{ newVersion
     };
 }
 
-function hasActualChanges(sectionMatch: RegExpExecArray): boolean {
-    const content = sectionMatch.groups!["sectionContent"];
+function hasActualChanges(content: string): boolean {
     return content.includes("*") && !content.includes("* None\n");
 }
 
