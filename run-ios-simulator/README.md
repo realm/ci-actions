@@ -5,7 +5,7 @@ This action can run on any Github runner and it can be added to a GitHub workflo
 
 ```yaml
 - name: Run iOS application
-  uses: realm/ci/run-ios-simulator@v1
+  uses: realm/ci-actions/run-ios-simulator@v1
   with:
     appPath: 'relative/path/to/your/iosApp.app'
     bundleId: 'domain.app.your'
@@ -15,14 +15,9 @@ This action can run on any Github runner and it can be added to a GitHub workflo
 
 The action takes the following parameters:
 
-1. *(Necessary)* __appPath__: a relative path to your app from the root of your repo
-2. *(Necessary)* __bundleId__: the app bundle id of your app
-3. *(Optional)* __iphoneToSimulate__: the ios devices that you want to simulated. If none is passed it defaults to *"iPhone-8"*
-4. *(Optional)* __arguments__: additional arguments to supply to the simulator
-
-
-![Ubuntu badge](https://badgen.net/badge/icon/Ubuntu?icon=terminal&label)
-![macOS badge](https://badgen.net/badge/icon/macOS?icon=apple&label)
-![Windows badge](https://badgen.net/badge/icon/Windows?icon=windows&label)
+1. *(Required)* `appPath`: a relative path to your app from the root of your repo
+2. *(Required)* `bundleId`: the app bundle id of your app
+3. *(Optional)* `iphoneToSimulate`: the ios devices that you want to simulated. If none is passed it defaults to *"iPhone-8"*
+4. *(Optional)* `arguments`: additional arguments to supply to the simulator
 
 [![GitHub release badge](https://badgen.net/github/release/realm/ci-actions/run-ios-simulator)](https://github.com/realm/ci-actions/releases/latest)
