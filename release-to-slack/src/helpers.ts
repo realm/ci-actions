@@ -41,9 +41,6 @@ class SlackPayload {
     }
 
     addSection(title: string, text: string): void {
-        core.info("---------------");
-        core.info(title);
-        core.info("---------------");
         this.blocks.push(new SectionBlock(`*${title}*`));
         this.blocks.push(new SectionBlock(slackifyMarkdown(text)));
     }
