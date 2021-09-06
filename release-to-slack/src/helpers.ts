@@ -1,6 +1,5 @@
 import slackifyMarkdown from "slackify-markdown";
 import moment from "moment";
-import * as core from "@actions/core";
 
 const sectionsRegex = /### (?<sectionName>[^\r\n]*)(?<sectionContent>.+?(?=###|$))/gs;
 
