@@ -19,6 +19,22 @@
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "protocol": "inspector"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug release-to-slack tests",
+            "cwd": "${workspaceFolder}/release-to-slack/",
+            "program": "${workspaceFolder}/release-to-slack/node_modules/mocha/bin/_mocha",
+            "args": [
+                "-r",
+                "ts-node/register",
+                "--colors",
+                "${workspaceFolder}/release-to-slack/__tests__/*.spec.ts",
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "protocol": "inspector"
         }
     ]
 }
