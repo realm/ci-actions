@@ -1,0 +1,19 @@
+name: 'release-to-slack'
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: release-to-slack
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          npm ci
+          npm run all
