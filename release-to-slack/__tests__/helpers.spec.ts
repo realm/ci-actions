@@ -23,5 +23,12 @@ class helpersTests {
         const payload = getPayload(changelog, ".NET", "https://github.com/realm/realm-dotnet", "10.4.1");
 
         expect(payload.blocks).to.have.lengthOf(9);
+        expect(payload.blocks[0].type).to.eq("header");
+        expect(payload.blocks[1].type).to.eq("context");
+        expect(payload.blocks[2].type).to.eq("divider");
+
+        for (let i = 3; i < payload.blocks.length; i++) {
+            expect(payload.blocks[i].type).to.eq("section");
+        }
     }
 }
