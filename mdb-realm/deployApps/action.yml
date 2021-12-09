@@ -18,7 +18,7 @@ inputs:
     required: true
     description: The private API key.
   appsPath:
-    required: true
+    required: false
     description: The path to the apps to import into MongoDB Realm.
   differentiator:
     required: true

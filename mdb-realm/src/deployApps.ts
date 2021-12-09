@@ -7,7 +7,7 @@ async function run(): Promise<void> {
     try {
         const config = getConfig();
 
-        const appsPath = core.getInput("appsPath", { required: true });
+        const appsPath = core.getInput("appsPath");
 
         await createCluster(config);
         await waitForClusterDeployment(config);
@@ -15,7 +15,7 @@ async function run(): Promise<void> {
         await configureRealmCli(config);
 
         const deployedApps: { [key: string]: string } = {};
-        for (const appPath of fs.readdirSync(appsPath)) {
+        for (const appPath of appsPath ? fs.readdirSync(appsPath) : []) {
             const deployInfo = await publishApplication(path.join(appsPath, appPath), config);
             deployedApps[appPath] = deployInfo.id;
         }
