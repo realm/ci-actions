@@ -1,0 +1,20 @@
+name: Issue Needs Attention
+# This workflow is triggered on issue comments.
+# Issues that has a Waiting-For-Reporter label, will get that label replaced with a "Needs-Attention" label
+# when the original author comments on the issue.
+
+on:
+  workflow_call:
+
+jobs:
+  applyNeedsAttentionLabel:
+    name: Apply Needs-Attention Label
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Apply Needs-Attention Label
+        uses: hramos/needs-attention@v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          response-required-label: 'Waiting-For-Reporter'
+          needs-attention-label: 'Needs-Attention'
