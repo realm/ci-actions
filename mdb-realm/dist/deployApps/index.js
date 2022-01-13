@@ -53794,17 +53794,25 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const config = helpers_1.getConfig();
-            const appsPath = core.getInput("appsPath", { required: true });
+            const appsPath = core.getInput("appsPath", { required: false });
             yield helpers_1.createCluster(config);
             yield helpers_1.waitForClusterDeployment(config);
-            yield helpers_1.configureRealmCli(config);
             const deployedApps = {};
-            for (const appPath of fs.readdirSync(appsPath)) {
-                const deployInfo = yield helpers_1.publishApplication(path_1.default.join(appsPath, appPath), config);
-                deployedApps[appPath] = deployInfo.id;
+            if (appsPath) {
+                yield helpers_1.configureRealmCli(config);
+                for (const appPath of fs.readdirSync(appsPath)) {
+                    const deployInfo = yield helpers_1.publishApplication(path_1.default.join(appsPath, appPath), config);
+                    deployedApps[appPath] = deployInfo.id;
+                }
             }
             const deployedAppsOutput = Buffer.from(JSON.stringify(deployedApps)).toString("base64");
             core.setOutput("deployedApps", deployedAppsOutput);
+            const atlasConfigOutput = Buffer.from(JSON.stringify({
+                clusterName: config.clusterName,
+                apiKey: config.apiKey,
+                privateApiKey: config.privateApiKey,
+            })).toString("base64");
+            core.setOutput("atlasConfig", atlasConfigOutput);
         }
         catch (error) {
             core.setFailed(`An unexpected error occurred: ${error.message}\n${error.stack}`);
@@ -53948,7 +53956,7 @@ function getConfig() {
         privateApiKey: core.getInput("privateApiKey", { required: true }),
         realmUrl: core.getInput("realmUrl", { required: false }) || "https://realm-dev.mongodb.com",
         atlasUrl: core.getInput("atlasUrl", { required: false }) || "https://cloud-dev.mongodb.com",
-        clusterName: `GHA-${getSuffix()}`,
+        clusterName: getSuffix(),
     };
 }
 exports.getConfig = getConfig;
