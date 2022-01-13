@@ -53807,12 +53807,7 @@ function run() {
             }
             const deployedAppsOutput = Buffer.from(JSON.stringify(deployedApps)).toString("base64");
             core.setOutput("deployedApps", deployedAppsOutput);
-            const atlasConfigOutput = Buffer.from(JSON.stringify({
-                clusterName: config.clusterName,
-                apiKey: config.apiKey,
-                privateApiKey: config.privateApiKey,
-            })).toString("base64");
-            core.setOutput("atlasConfig", atlasConfigOutput);
+            core.setOutput("clusterName", config.clusterName);
         }
         catch (error) {
             core.setFailed(`An unexpected error occurred: ${error.message}\n${error.stack}`);
