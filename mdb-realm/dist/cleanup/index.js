@@ -53944,11 +53944,11 @@ function createCluster(config) {
         const payload = {
             name: config.clusterName,
             providerSettings: {
-                instanceSizeName: "M5",
-                providerName: "TENANT",
+                instanceSizeName: "M10",
+                providerName: "AWS",
                 regionName: "US_EAST_1",
-                backingProviderName: "AWS",
             },
+            mongoDBMajorVersion: "5.0",
         };
         core.info(`Creating Atlas cluster: ${config.clusterName}`);
         const response = yield execAtlasRequest(config.atlasUrl, "POST", "clusters", config, payload);
