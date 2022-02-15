@@ -119,7 +119,6 @@ export async function createCluster(config: EnvironmentConfig): Promise<void> {
             regionName: "US_EAST_1",
             backingProviderName: "AWS",
         },
-        mongoDBMajorVersion: "5.0",
     };
 
     core.info(`Creating Atlas cluster: ${config.clusterName}`);

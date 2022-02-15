@@ -53949,7 +53949,6 @@ function createCluster(config) {
                 regionName: "US_EAST_1",
                 backingProviderName: "AWS",
             },
-            mongoDBMajorVersion: "5.0",
         };
         core.info(`Creating Atlas cluster: ${config.clusterName}`);
         const response = yield execAtlasRequest(config.atlasUrl, "POST", "clusters", config, payload);
