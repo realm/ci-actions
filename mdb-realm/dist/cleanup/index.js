@@ -53935,7 +53935,7 @@ function getConfig() {
         privateApiKey: core.getInput("privateApiKey", { required: true }),
         realmUrl: core.getInput("realmUrl", { required: false }) || "https://realm-dev.mongodb.com",
         atlasUrl: core.getInput("atlasUrl", { required: false }) || "https://cloud-dev.mongodb.com",
-        clusterName: `GHA-${getSuffix()}`,
+        clusterName: getSuffix(),
     };
 }
 exports.getConfig = getConfig;

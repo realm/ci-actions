@@ -18,7 +18,7 @@ inputs:
     required: true
     description: The private API key.
   appsPath:
-    required: true
+    required: false
     description: The path to the apps to import into MongoDB Realm.
   differentiator:
     required: true
@@ -26,6 +26,8 @@ inputs:
 outputs:
   deployedApps:
     description: "A base64-encoded json object keyed on the app name containing the app ids of the deployed apps - e.g. { \"app1\": \"app1-abcde\"}"
+  clusterName:
+    description: The name of the created cluster
 runs:
   using: node12
   main: ../dist/deployApps/index.js
