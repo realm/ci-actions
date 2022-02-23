@@ -221,7 +221,8 @@ export async function deleteApplications(config: EnvironmentConfig): Promise<voi
 
     for (const app of allApps) {
         const describeResponse = await execCliCmd(`apps describe -a ${app}`);
-        if (describeResponse[0]?.doc.data_sources[0]?.data_source === config.clusterName) {
+        const dataSource = describeResponse[0]?.doc.data_sources[0]?.data_source;
+        if (!dataSource || dataSource === config.clusterName) {
             core.info(`Deleting ${app}`);
             await execCliCmd(`apps delete -a ${app}`);
             core.info(`Deleted ${app}`);
