@@ -74,6 +74,10 @@ function getNextVersion(prevVersion: string, sectionName: string): string | unde
         case "Enhancements":
             return semver.inc(prevVersion, "minor")!;
         case "Breaking Changes":
+            // Breaking changes don't need incrementing major version when we're pre-v1.
+            if (semver.parse(prevVersion)!.major === 0) {
+                return semver.inc(prevVersion, "minor")!;
+            }
             return semver.inc(prevVersion, "major")!;
         default:
             return undefined;

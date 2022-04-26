@@ -131,6 +131,41 @@ const preReleaseChangelog = `
 ### Internal
 * This is super internal`;
 
+const preV1Changelog = `
+## vNext (TBD)
+
+### Breaking Changes
+* Broke some API
+
+### Fixed
+* Fixed some stuff
+
+### Enhancements
+* This added an amazing enhancmement
+
+### Compatibility
+* Foo bar
+
+### Internal
+* This is super internal
+
+## 0.2.1+alpha (2019-02-03)
+
+### Breaking Changes
+* Breaking changes are fine pre-v1
+
+### Fixed
+* Something
+
+### Enhancements
+* Something else
+
+### Compatibility
+* Foo bar
+
+### Internal
+* This is super internal`;
+
 @suite
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class helpersTests {
@@ -138,6 +173,7 @@ class helpersTests {
     @params({ input: minorBumpChangelog, expected: "10.3.0" }, "processor: minor")
     @params({ input: majorBumpChangelog, expected: "11.0.0" }, "processor: major")
     @params({ input: preReleaseChangelog, expected: "3.0.0-beta.3" }, "processor: pre")
+    @params({ input: preV1Changelog, expected: "0.3.0" }, "processor: prev1")
     testChangelogProcessor(args: { input: string; expected: string }): void {
         const result = processChangelog(args.input);
         expect(result.newVersion).to.equal(args.expected);
@@ -149,6 +185,7 @@ class helpersTests {
     @params({ input: minorBumpChangelog, expected: "10.3.0" }, "updater: minor")
     @params({ input: majorBumpChangelog, expected: "11.0.0" }, "updater: major")
     @params({ input: preReleaseChangelog, expected: "3.0.0-beta.3" }, "updater: pre")
+    @params({ input: preV1Changelog, expected: "0.3.0" }, "updater: prev1")
     async testChangelogUpdater(args: { input: string; expected: string }): Promise<void> {
         const tempFile = tmp.tmpNameSync();
         try {
