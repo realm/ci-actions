@@ -8,11 +8,12 @@ inputs:
   version-suffix:
     required: false
     description: an optional suffix to add to the generated version
+  latest-version-changelog:
+    required: false
+    description: an optional path to store the changes from the latest version section
 outputs:
   new-version:
     description: The new version as inferred from the changelog
-  lastest-version-changes:
-    description: The changes in the latest version section in the changelog
 runs:
   using: node12
   main: dist/index.js
