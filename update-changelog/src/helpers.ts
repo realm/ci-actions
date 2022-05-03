@@ -8,7 +8,7 @@ const sectionsRegex = /### (?<sectionName>[^\n]*)(?<sectionContent>[^#]*)/gm;
 export function processChangelog(
     changelog: string,
     versionSuffix?: string,
-): { updatedChangelog: string; newVersion: string } {
+): { updatedChangelog: string; newVersion: string; latestVersionChanges: string } {
     changelogRegex.lastIndex = 0;
     sectionsRegex.lastIndex = 0;
 
@@ -51,13 +51,27 @@ export function processChangelog(
     const versionToReplace = changelogMatch.groups["currentVersion"];
     const todaysDate = moment().format("YYYY-MM-DD");
     changelog = changelog.replace(`## ${versionToReplace}\n`, `## ${newVersion} (${todaysDate})\n`);
+
+    const latestVersionPattern = `^(?<latestVersionChanges>.+?)(?=\n## ${escapeRegExp(prevVersion)})`;
+    const latestVersionRegex = new RegExp(latestVersionPattern, "gms");
+    const latestVersionMatch = latestVersionRegex.exec(changelog);
+    if (!latestVersionMatch || !latestVersionMatch.groups) {
+        throw new Error(
+            `Failed to match latest version section. Regex: "${latestVersionPattern}", changelog: ${changelog}`,
+        );
+    }
+
     return {
         updatedChangelog: changelog,
         newVersion,
+        latestVersionChanges: latestVersionMatch.groups["latestVersionChanges"].trim(),
     };
 }
 
-export async function updateChangelogContent(path: string, versionSuffix?: string): Promise<{ newVersion: string }> {
+export async function updateChangelogContent(
+    path: string,
+    versionSuffix?: string,
+): Promise<{ newVersion: string; latestVersionChanges: string }> {
     const changelog = await fs.promises.readFile(path, { encoding: "utf-8" });
 
     const changelogUpdate = processChangelog(changelog, versionSuffix);
@@ -65,6 +79,7 @@ export async function updateChangelogContent(path: string, versionSuffix?: strin
 
     return {
         newVersion: changelogUpdate.newVersion,
+        latestVersionChanges: changelogUpdate.latestVersionChanges,
     };
 }
 
@@ -87,4 +102,8 @@ function getNextVersion(prevVersion: string, sectionName: string): string | unde
         default:
             return undefined;
     }
+}
+
+function escapeRegExp(str: string): string {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }
