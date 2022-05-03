@@ -13,7 +13,11 @@ async function run(): Promise<void> {
 
         const result = await updateChangelogContent(changelogPath, versionSuffix);
         core.setOutput("new-version", result.newVersion);
-        core.setOutput("lastest-version-changes", result.latestVersionChanges);
+
+        const latestVersionChangelog = core.getInput("latest-version-changelog");
+        if (latestVersionChangelog) {
+            await fs.promises.writeFile(latestVersionChangelog, result.latestVersionChanges);
+        }
     } catch (error) {
         core.setFailed(error.message);
     }
