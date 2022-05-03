@@ -82,9 +82,16 @@ function processChangelog(changelog, versionSuffix) {
     const versionToReplace = changelogMatch.groups["currentVersion"];
     const todaysDate = moment_1.default().format("YYYY-MM-DD");
     changelog = changelog.replace(`## ${versionToReplace}\n`, `## ${newVersion} (${todaysDate})\n`);
+    const latestVersionPattern = `^(?<latestVersionChanges>.+?)(?=\n## ${escapeRegExp(prevVersion)})`;
+    const latestVersionRegex = new RegExp(latestVersionPattern, "gms");
+    const latestVersionMatch = latestVersionRegex.exec(changelog);
+    if (!latestVersionMatch || !latestVersionMatch.groups) {
+        throw new Error(`Failed to match latest version section. Regex: "${latestVersionPattern}", changelog: ${changelog}`);
+    }
     return {
         updatedChangelog: changelog,
         newVersion,
+        latestVersionChanges: latestVersionMatch.groups["latestVersionChanges"].trim(),
     };
 }
 exports.processChangelog = processChangelog;
@@ -95,6 +102,7 @@ function updateChangelogContent(path, versionSuffix) {
         yield fs.promises.writeFile(path, changelogUpdate.updatedChangelog, { encoding: "utf-8" });
         return {
             newVersion: changelogUpdate.newVersion,
+            latestVersionChanges: changelogUpdate.latestVersionChanges,
         };
     });
 }
@@ -117,6 +125,9 @@ function getNextVersion(prevVersion, sectionName) {
         default:
             return undefined;
     }
+}
+function escapeRegExp(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
 }
 
 

@@ -6,6 +6,18 @@ import moment from "moment";
 import * as fs from "fs";
 import * as tmp from "tmp";
 
+const expectedPatchLatest = `
+## *replace-me*
+
+### Fixed
+* Something important was fixed
+
+### Compatibility
+* Foo bar
+
+### Internal
+* This is super internal`;
+
 const patchBumpChangelog = `
 ## vNext (TBD)
 
@@ -28,6 +40,21 @@ const patchBumpChangelog = `
 
 ### Enhancements
 * Something else
+
+### Compatibility
+* Foo bar
+
+### Internal
+* This is super internal`;
+
+const expectedMinorLatest = `
+## *replace-me*
+
+### Fixed
+* Something important was fixed
+
+### Enhancements
+* This added an amazing enhancmement
 
 ### Compatibility
 * Foo bar
@@ -67,6 +94,21 @@ const minorBumpChangelog = `
 ### Internal
 * This is super internal`;
 
+const expectedMajorLatest = `
+## *replace-me*
+
+### Breaking Changes
+* Broke some API
+
+### Enhancements
+* This added an amazing enhancmement
+
+### Compatibility
+* Foo bar
+
+### Internal
+* This is super internal`;
+
 const majorBumpChangelog = `
 ## vNext (TBD)
 
@@ -99,6 +141,24 @@ const majorBumpChangelog = `
 ### Internal
 * This is super internal`;
 
+const expectedPreReleaseLatest = `
+## *replace-me*
+
+### Breaking Changes
+* Broke some API
+
+### Fixed
+* Fixed some stuff
+
+### Enhancements
+* This added an amazing enhancmement
+
+### Compatibility
+* Foo bar
+
+### Internal
+* This is super internal`;
+
 const preReleaseChangelog = `
 ## vNext (TBD)
 
@@ -124,6 +184,24 @@ const preReleaseChangelog = `
 
 ### Enhancements
 * Something else
+
+### Compatibility
+* Foo bar
+
+### Internal
+* This is super internal`;
+
+const expectedPreV1Latest = `
+## *replace-me*
+
+### Breaking Changes
+* Broke some API
+
+### Fixed
+* Fixed some stuff
+
+### Enhancements
+* This added an amazing enhancmement
 
 ### Compatibility
 * Foo bar
@@ -169,33 +247,69 @@ const preV1Changelog = `
 @suite
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class helpersTests {
-    @params({ input: patchBumpChangelog, expected: "1.2.4" }, "processor: patch")
-    @params({ input: minorBumpChangelog, expected: "10.3.0" }, "processor: minor")
-    @params({ input: majorBumpChangelog, expected: "11.0.0" }, "processor: major")
-    @params({ input: preReleaseChangelog, expected: "3.0.0-beta.3" }, "processor: pre")
-    @params({ input: preV1Changelog, expected: "0.3.0" }, "processor: prev1")
-    testChangelogProcessor(args: { input: string; expected: string }): void {
+    @params(
+        { input: patchBumpChangelog, expectedVersion: "1.2.4", expectedChanges: expectedPatchLatest },
+        "processor: patch",
+    )
+    @params(
+        { input: minorBumpChangelog, expectedVersion: "10.3.0", expectedChanges: expectedMinorLatest },
+        "processor: minor",
+    )
+    @params(
+        { input: majorBumpChangelog, expectedVersion: "11.0.0", expectedChanges: expectedMajorLatest },
+        "processor: major",
+    )
+    @params(
+        { input: preReleaseChangelog, expectedVersion: "3.0.0-beta.3", expectedChanges: expectedPreReleaseLatest },
+        "processor: pre",
+    )
+    @params(
+        { input: preV1Changelog, expectedVersion: "0.3.0", expectedChanges: expectedPreV1Latest },
+        "processor: prev1",
+    )
+    testChangelogProcessor(args: { input: string; expectedVersion: string; expectedChanges: string }): void {
         const result = processChangelog(args.input);
-        expect(result.newVersion).to.equal(args.expected);
+        expect(result.newVersion).to.equal(args.expectedVersion);
 
-        this.validateUpdatedChangelogContents(result.updatedChangelog, args.expected);
+        this.validateExpectedChanges(result.latestVersionChanges, args.expectedChanges, args.expectedVersion);
+        this.validateUpdatedChangelogContents(result.updatedChangelog, args.expectedVersion);
     }
 
-    @params({ input: patchBumpChangelog, expected: "1.2.4" }, "updater: patch")
-    @params({ input: minorBumpChangelog, expected: "10.3.0" }, "updater: minor")
-    @params({ input: majorBumpChangelog, expected: "11.0.0" }, "updater: major")
-    @params({ input: preReleaseChangelog, expected: "3.0.0-beta.3" }, "updater: pre")
-    @params({ input: preV1Changelog, expected: "0.3.0" }, "updater: prev1")
-    async testChangelogUpdater(args: { input: string; expected: string }): Promise<void> {
+    @params(
+        { input: patchBumpChangelog, expectedVersion: "1.2.4", expectedChanges: expectedPatchLatest },
+        "processor: patch",
+    )
+    @params(
+        { input: minorBumpChangelog, expectedVersion: "10.3.0", expectedChanges: expectedMinorLatest },
+        "processor: minor",
+    )
+    @params(
+        { input: majorBumpChangelog, expectedVersion: "11.0.0", expectedChanges: expectedMajorLatest },
+        "processor: major",
+    )
+    @params(
+        { input: preReleaseChangelog, expectedVersion: "3.0.0-beta.3", expectedChanges: expectedPreReleaseLatest },
+        "processor: pre",
+    )
+    @params(
+        { input: preV1Changelog, expectedVersion: "0.3.0", expectedChanges: expectedPreV1Latest },
+        "processor: prev1",
+    )
+    async testChangelogUpdater(args: {
+        input: string;
+        expectedVersion: string;
+        expectedChanges: string;
+    }): Promise<void> {
         const tempFile = tmp.tmpNameSync();
         try {
             await fs.promises.writeFile(tempFile, args.input);
             const result = await updateChangelogContent(tempFile);
 
-            expect(result.newVersion).to.equal(args.expected);
+            expect(result.newVersion).to.equal(args.expectedVersion);
+            this.validateExpectedChanges(result.latestVersionChanges, args.expectedChanges, args.expectedVersion);
 
             const changelog = await fs.promises.readFile(tempFile, { encoding: "utf-8" });
-            this.validateUpdatedChangelogContents(changelog, args.expected);
+            this.validateUpdatedChangelogContents(changelog, args.expectedVersion);
         } finally {
             await fs.promises.unlink(tempFile);
         }
@@ -226,12 +340,24 @@ class helpersTests {
     }
 
     validateUpdatedChangelogContents(changelog: string, expectedVersion: string) {
+        expect(changelog).to.contain(`${this.getExpectedHeader(expectedVersion)}\n`);
+
+        expect(changelog).not.to.contain("* None\n");
+    }
+
+    getExpectedHeader(expectedVersion: string) {
         const todaysDate = moment();
         const year = todaysDate.year().toString().padStart(4, "0");
         const month = (todaysDate.month() + 1).toString().padStart(2, "0");
         const day = todaysDate.date().toString().padStart(2, "0");
-        expect(changelog).to.contain(`## ${expectedVersion} (${year}-${month}-${day})\n`);
 
-        expect(changelog).not.to.contain("* None\n");
+        return `## ${expectedVersion} (${year}-${month}-${day})`;
+    }
+
+    validateExpectedChanges(actual: string, expectedChanges: string, expectedVersion: string) {
+        const expectedHeader = this.getExpectedHeader(expectedVersion);
+        expectedChanges = expectedChanges.trim().replace("## *replace-me*", expectedHeader);
+
+        expect(actual).to.equal(expectedChanges);
     }
 }

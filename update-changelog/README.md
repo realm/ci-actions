@@ -25,9 +25,11 @@ Next version based on the content of the top section of the changelog and the pr
 The action takes the following parameters:
 
 1. *(Required)* `changelog`: the path to the CHANGELOG.md.
+1. *(Optional)* `version-suffix`: an optional suffix to append to the version.
 
 The action has the following outputs:
 
 1. `new-version`: the inferred version based on the changelog contents.
+1. `lastest-version-changes`: the changes in the latest version section of the changelog
 
 [![GitHub release badge](https://badgen.net/github/release/realm/ci-actions/run-ios-simulator)](https://github.com/realm/ci-actions/releases/latest)
