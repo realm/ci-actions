@@ -45,7 +45,7 @@ const moment_1 = __importDefault(__webpack_require__(9623));
 const fs = __importStar(__webpack_require__(5747));
 const changelogRegex = /^## (?<currentVersion>[^\n]*)[^#]*(?<sections>.*?)\n## (?<prevVersion>[^ ]*)/gms;
 const sectionsRegex = /### (?<sectionName>[^\n]*)(?<sectionContent>[^#]*)/gm;
-function processChangelog(changelog) {
+function processChangelog(changelog, versionSuffix) {
     changelogRegex.lastIndex = 0;
     sectionsRegex.lastIndex = 0;
     const changelogMatch = changelogRegex.exec(changelog);
@@ -78,6 +78,7 @@ function processChangelog(changelog) {
             }
         }
     }
+    newVersion = `${newVersion}${versionSuffix || ""}`;
     const versionToReplace = changelogMatch.groups["currentVersion"];
     const todaysDate = moment_1.default().format("YYYY-MM-DD");
     changelog = changelog.replace(`## ${versionToReplace}\n`, `## ${newVersion} (${todaysDate})\n`);
@@ -87,10 +88,10 @@ function processChangelog(changelog) {
     };
 }
 exports.processChangelog = processChangelog;
-function updateChangelogContent(path) {
+function updateChangelogContent(path, versionSuffix) {
     return __awaiter(this, void 0, void 0, function* () {
         const changelog = yield fs.promises.readFile(path, { encoding: "utf-8" });
-        const changelogUpdate = processChangelog(changelog);
+        const changelogUpdate = processChangelog(changelog, versionSuffix);
         yield fs.promises.writeFile(path, changelogUpdate.updatedChangelog, { encoding: "utf-8" });
         return {
             newVersion: changelogUpdate.newVersion,
@@ -165,7 +166,8 @@ function run() {
             if (!fs.existsSync(changelogPath)) {
                 throw new Error(`File ${changelogPath} doesn't exist.`);
             }
-            const result = yield helpers_1.updateChangelogContent(changelogPath);
+            const versionSuffix = core.getInput("versionSuffix", { required: false });
+            const result = yield helpers_1.updateChangelogContent(changelogPath, versionSuffix);
             core.setOutput("new-version", result.newVersion);
         }
         catch (error) {

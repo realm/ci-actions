@@ -9,7 +9,9 @@ async function run(): Promise<void> {
             throw new Error(`File ${changelogPath} doesn't exist.`);
         }
 
-        const result = await updateChangelogContent(changelogPath);
+        const versionSuffix = core.getInput("versionSuffix", { required: false });
+
+        const result = await updateChangelogContent(changelogPath, versionSuffix);
         core.setOutput("new-version", result.newVersion);
     } catch (error) {
         core.setFailed(error.message);

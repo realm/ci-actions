@@ -5,7 +5,10 @@ import * as fs from "fs";
 const changelogRegex = /^## (?<currentVersion>[^\n]*)[^#]*(?<sections>.*?)\n## (?<prevVersion>[^ ]*)/gms;
 const sectionsRegex = /### (?<sectionName>[^\n]*)(?<sectionContent>[^#]*)/gm;
 
-export function processChangelog(changelog: string): { updatedChangelog: string; newVersion: string } {
+export function processChangelog(
+    changelog: string,
+    versionSuffix?: string,
+): { updatedChangelog: string; newVersion: string } {
     changelogRegex.lastIndex = 0;
     sectionsRegex.lastIndex = 0;
 
@@ -43,6 +46,8 @@ export function processChangelog(changelog: string): { updatedChangelog: string;
         }
     }
 
+    newVersion = `${newVersion}${versionSuffix || ""}`;
+
     const versionToReplace = changelogMatch.groups["currentVersion"];
     const todaysDate = moment().format("YYYY-MM-DD");
     changelog = changelog.replace(`## ${versionToReplace}\n`, `## ${newVersion} (${todaysDate})\n`);
@@ -52,10 +57,10 @@ export function processChangelog(changelog: string): { updatedChangelog: string;
     };
 }
 
-export async function updateChangelogContent(path: string): Promise<{ newVersion: string }> {
+export async function updateChangelogContent(path: string, versionSuffix?: string): Promise<{ newVersion: string }> {
     const changelog = await fs.promises.readFile(path, { encoding: "utf-8" });
 
-    const changelogUpdate = processChangelog(changelog);
+    const changelogUpdate = processChangelog(changelog, versionSuffix);
     await fs.promises.writeFile(path, changelogUpdate.updatedChangelog, { encoding: "utf-8" });
 
     return {

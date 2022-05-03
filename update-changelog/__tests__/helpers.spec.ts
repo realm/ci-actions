@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import "mocha";
-import { suite, params } from "@testdeck/mocha";
+import { suite, params, test } from "@testdeck/mocha";
 import { processChangelog, updateChangelogContent } from "../src/helpers";
 import moment from "moment";
 import * as fs from "fs";
@@ -196,6 +196,30 @@ class helpersTests {
 
             const changelog = await fs.promises.readFile(tempFile, { encoding: "utf-8" });
             this.validateUpdatedChangelogContents(changelog, args.expected);
+        } finally {
+            await fs.promises.unlink(tempFile);
+        }
+    }
+
+    @test
+    testChangelogProcessorWithSuffix(): void {
+        const result = processChangelog(minorBumpChangelog, "+alpha");
+        expect(result.newVersion).to.equal("10.3.0+alpha");
+
+        this.validateUpdatedChangelogContents(result.updatedChangelog, "10.3.0+alpha");
+    }
+
+    @test
+    async testChangelogUpdaterWithSuffix(): Promise<void> {
+        const tempFile = tmp.tmpNameSync();
+        try {
+            await fs.promises.writeFile(tempFile, minorBumpChangelog);
+            const result = await updateChangelogContent(tempFile, "+alpha");
+
+            expect(result.newVersion).to.equal("10.3.0+alpha");
+
+            const changelog = await fs.promises.readFile(tempFile, { encoding: "utf-8" });
+            this.validateUpdatedChangelogContents(changelog, "10.3.0+alpha");
         } finally {
             await fs.promises.unlink(tempFile);
         }
