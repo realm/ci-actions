@@ -54034,7 +54034,8 @@ function deleteApplications(config) {
         const allApps = listResponse[0].data.map(a => a.split(" ")[0]).filter(a => a.includes(suffix));
         for (const app of allApps) {
             const describeResponse = yield execCliCmd(`apps describe -a ${app}`);
-            if (((_b = (_a = describeResponse[0]) === null || _a === void 0 ? void 0 : _a.doc.data_sources[0]) === null || _b === void 0 ? void 0 : _b.data_source) === config.clusterName) {
+            const dataSource = (_b = (_a = describeResponse[0]) === null || _a === void 0 ? void 0 : _a.doc.data_sources[0]) === null || _b === void 0 ? void 0 : _b.data_source;
+            if (!dataSource || dataSource === config.clusterName) {
                 core.info(`Deleting ${app}`);
                 yield execCliCmd(`apps delete -a ${app}`);
                 core.info(`Deleted ${app}`);
