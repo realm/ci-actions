@@ -177,9 +177,15 @@ function run() {
             if (!fs.existsSync(changelogPath)) {
                 throw new Error(`File ${changelogPath} doesn't exist.`);
             }
-            const versionSuffix = core.getInput("versionSuffix", { required: false });
+            const versionSuffix = core.getInput("version-suffix", { required: false });
+            core.info(`Creating a new version with suffix ${versionSuffix}`);
             const result = yield helpers_1.updateChangelogContent(changelogPath, versionSuffix);
             core.setOutput("new-version", result.newVersion);
+            core.info(`Inferred version: ${result.newVersion}`);
+            const latestVersionChangelog = core.getInput("latest-version-changelog");
+            if (latestVersionChangelog) {
+                yield fs.promises.writeFile(latestVersionChangelog, result.latestVersionChanges);
+            }
         }
         catch (error) {
             core.setFailed(error.message);
