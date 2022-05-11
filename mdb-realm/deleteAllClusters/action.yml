@@ -1,12 +1,12 @@
 name: deleteAllClusters
-description: Deletes all BaaS apps and Atlas clusters in a project
+description: Deletes all apps and clusters in a project
 author: Realm
 inputs:
   atlasUrl:
-    required: true
+    required: false
     description: The Atlas url - e.g. https://cloud-dev.mongodb.com.
   realmUrl:
-    required: true
+    required: false
     description: The MongoDB Realm url - e.g. https://realm-dev.mongodb.com.
   projectId:
     required: true
@@ -19,4 +19,4 @@ inputs:
     description: The private API key.
 runs:
   using: node12
-  main: ../dist/cleanup/index.js
+  main: ../dist/deleteAllClusters/index.js

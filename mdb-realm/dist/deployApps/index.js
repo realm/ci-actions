@@ -53854,7 +53854,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.deleteApplications = exports.publishApplication = exports.configureRealmCli = exports.waitForClusterDeployment = exports.deleteCluster = exports.createCluster = exports.getConfig = void 0;
+exports.deleteApplications = exports.publishApplication = exports.configureRealmCli = exports.waitForClusterDeployment = exports.deleteCluster = exports.getClusters = exports.createCluster = exports.getConfig = void 0;
 const core = __importStar(__webpack_require__(2186));
 const exec = __importStar(__webpack_require__(1514));
 const fs = __importStar(__webpack_require__(5747));
@@ -53931,27 +53931,30 @@ function execAtlasRequest(atlasUrl, method, route, config, payload) {
         return JSON.parse(response.data);
     });
 }
-function getSuffix() {
-    const differentiator = core.getInput("differentiator", { required: true });
-    return crypto_1.createHash("md5")
-        .update(`${getRunId()}-${differentiator}`)
-        .digest("base64")
-        .replace(/\+/g, "")
-        .replace(/\//g, "")
-        .toLowerCase()
-        .substring(0, 8);
+function getSuffix(requireDifferentiator = true) {
+    const differentiator = core.getInput("differentiator", { required: requireDifferentiator });
+    if (differentiator) {
+        return crypto_1.createHash("md5")
+            .update(`${getRunId()}-${differentiator}`)
+            .digest("base64")
+            .replace(/\+/g, "")
+            .replace(/\//g, "")
+            .toLowerCase()
+            .substring(0, 8);
+    }
+    return "no-cluster";
 }
 function getRunId() {
     return process.env.GITHUB_RUN_ID || "";
 }
-function getConfig() {
+function getConfig(requireDifferentiator = true) {
     return {
         projectId: core.getInput("projectId", { required: true }),
         apiKey: core.getInput("apiKey", { required: true }),
         privateApiKey: core.getInput("privateApiKey", { required: true }),
         realmUrl: core.getInput("realmUrl", { required: false }) || "https://realm-dev.mongodb.com",
         atlasUrl: core.getInput("atlasUrl", { required: false }) || "https://cloud-dev.mongodb.com",
-        clusterName: getSuffix(),
+        clusterName: getSuffix(requireDifferentiator),
     };
 }
 exports.getConfig = getConfig;
@@ -53972,11 +53975,19 @@ function createCluster(config) {
     });
 }
 exports.createCluster = createCluster;
-function deleteCluster(config) {
+function getClusters(config) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.info(`Deleting Atlas cluster: ${config.clusterName}`);
-        yield execAtlasRequest(config.atlasUrl, "DELETE", `clusters/${config.clusterName}`, config);
-        core.info(`Deleted Atlas cluster: ${config.clusterName}`);
+        const response = yield execAtlasRequest(config.atlasUrl, "GET", "clusters", config);
+        return response.results.map((c) => c.name);
+    });
+}
+exports.getClusters = getClusters;
+function deleteCluster(config, clusterName) {
+    return __awaiter(this, void 0, void 0, function* () {
+        clusterName = clusterName || config.clusterName;
+        core.info(`Deleting Atlas cluster: ${clusterName}`);
+        yield execAtlasRequest(config.atlasUrl, "DELETE", `clusters/${clusterName}`, config);
+        core.info(`Deleted Atlas cluster: ${clusterName}`);
     });
 }
 exports.deleteCluster = deleteCluster;
@@ -54042,18 +54053,25 @@ function publishApplication(appPath, config) {
     });
 }
 exports.publishApplication = publishApplication;
-function deleteApplications(config) {
+function deleteApplications(config, deleteAll = false) {
     var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         const suffix = getSuffix();
         const listResponse = yield execCliCmd("apps list");
-        const allApps = listResponse[0].data.map(a => a.split(" ")[0]).filter(a => a.includes(suffix));
+        const allApps = listResponse[0].data
+            .map(a => a.split(" ")[0])
+            .filter(a => deleteAll || a.includes(suffix));
         for (const app of allApps) {
-            const describeResponse = yield execCliCmd(`apps describe -a ${app}`);
-            if (((_b = (_a = describeResponse[0]) === null || _a === void 0 ? void 0 : _a.doc.data_sources[0]) === null || _b === void 0 ? void 0 : _b.data_source) === config.clusterName) {
-                core.info(`Deleting ${app}`);
-                yield execCliCmd(`apps delete -a ${app}`);
-                core.info(`Deleted ${app}`);
+            try {
+                const describeResponse = yield execCliCmd(`apps describe -a ${app}`);
+                if (((_b = (_a = describeResponse[0]) === null || _a === void 0 ? void 0 : _a.doc.data_sources[0]) === null || _b === void 0 ? void 0 : _b.data_source) === config.clusterName) {
+                    core.info(`Deleting ${app}`);
+                    yield execCliCmd(`apps delete -a ${app}`);
+                    core.info(`Deleted ${app}`);
+                }
+            }
+            catch (error) {
+                core.warning(`Failed to delete ${app}: ${error.message}`);
             }
         }
     });

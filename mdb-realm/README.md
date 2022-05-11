@@ -58,11 +58,43 @@ The action takes the following parameters:
 1. *(Required)* `projectId`: the Id of the Atlas project where the cluster will be created.
 1. *(Required)* `apiKey`: the public [Atlas API key](https://docs.atlas.mongodb.com/configure-api-access/).
 1. *(Required)* `privateApiKey`: the private [Atlas API key](https://docs.atlas.mongodb.com/configure-api-access/).
-1. *(Required)* `appsPath`: the path where the exported apps are located.
 1. *(Required)* `differentiator`: a string to differentiate this deployment from others in the same workflow. This value will be combined with the Github Actions run id to generate a unique string for each run+target combination.
+1. *(Optional)* `appsPath`: the path where the exported apps are located.
 1. *(Optional)* `atlasUrl`: the Atlas URL to deploy against. Default is https://cloud-dev.mongodb.com.
 1. *(Optional)* `realmUrl`: the MongoDB Realm URL to deploy against. Default is https://realm-dev.mongodb.com.
 
 The action has the following outputs:
 
 1. `deployedApps`: a base64-encoded json object containing a map from `*folder name*: appId` where `*folder name*` is the name of the folder containing the imported app relative to `appsPath` and `appId` is the id of the newly imported app.
+1. `clusterName`: the name of the Atlas cluster created.
+
+## deleteAllClusters
+
+Deletes all apps and clusters from a project. Use this only as a manual cleanup action as it may mess up existing jobs that are using the clusters.
+
+## Usage
+
+```yaml
+name: Wipe all clusters
+
+on:
+  workflow_dispatch:
+jobs:
+  wipe-all-clusters:
+    runs-on: ubuntu-latest
+      name: Wipe all clusters and apps
+      steps:
+      - uses: realm/ci-actions/mdb-realm/deleteAllClusters@v5
+        with:
+          projectId: ${{ secrets.ATLAS_PROJECT_ID }}
+          apiKey: ${{ secrets.ATLAS_PUBLIC_API_KEY }}
+          privateApiKey: ${{ secrets.ATLAS_PRIVATE_API_KEY }}
+```
+
+The action takes the following parameters:
+
+1. *(Required)* `projectId`: the Id of the Atlas project where the cluster will be created.
+1. *(Required)* `apiKey`: the public [Atlas API key](https://docs.atlas.mongodb.com/configure-api-access/).
+1. *(Required)* `privateApiKey`: the private [Atlas API key](https://docs.atlas.mongodb.com/configure-api-access/).
+1. *(Optional)* `atlasUrl`: the Atlas URL to deploy against. Default is https://cloud-dev.mongodb.com.
+1. *(Optional)* `realmUrl`: the MongoDB Realm URL to deploy against. Default is https://realm-dev.mongodb.com.

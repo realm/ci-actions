@@ -5,8 +5,12 @@ async function run(): Promise<void> {
     try {
         const config = getConfig();
 
-        await configureRealmCli(config);
-        await deleteApplications(config);
+        try {
+            await configureRealmCli(config);
+            await deleteApplications(config);
+        } catch (error: any) {
+            core.warning(`Failed to delete applications: ${error.message}`);
+        }
 
         await deleteCluster(config);
     } catch (error: any) {

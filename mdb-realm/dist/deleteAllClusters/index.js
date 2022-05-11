@@ -53749,7 +53749,7 @@ XRegExp = XRegExp || (function (undef) {
 
 /***/ }),
 
-/***/ 3812:
+/***/ 3142:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -53788,15 +53788,23 @@ const helpers_1 = __webpack_require__(3015);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const config = helpers_1.getConfig();
+            const config = helpers_1.getConfig(/* requireDifferentiator */ false);
             try {
                 yield helpers_1.configureRealmCli(config);
-                yield helpers_1.deleteApplications(config);
+                yield helpers_1.deleteApplications(config, /* deleteAll */ true);
             }
             catch (error) {
                 core.warning(`Failed to delete applications: ${error.message}`);
             }
-            yield helpers_1.deleteCluster(config);
+            const clusters = yield helpers_1.getClusters(config);
+            for (const cluster of clusters) {
+                try {
+                    yield helpers_1.deleteCluster(config, cluster);
+                }
+                catch (error) {
+                    core.warning(`Failed to delete cluster ${cluster}: ${error.message}\n${error.stack}`);
+                }
+            }
         }
         catch (error) {
             core.setFailed(`An unexpected error occurred: ${error.message}\n${error.stack}`);
@@ -54438,7 +54446,7 @@ module.exports = require("zlib");;
 /******/ 	// module exports must be returned from runtime so entry inlining is disabled
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(3812);
+/******/ 	return __webpack_require__(3142);
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map
