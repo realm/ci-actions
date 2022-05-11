@@ -54045,7 +54045,7 @@ exports.publishApplication = publishApplication;
 function deleteApplications(config, deleteAll = false) {
     var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
-        const suffix = getSuffix();
+        const suffix = getSuffix(/* requireDifferentiator */ !deleteAll);
         const listResponse = yield execCliCmd("apps list");
         const allApps = listResponse[0].data
             .map(a => a.split(" ")[0])

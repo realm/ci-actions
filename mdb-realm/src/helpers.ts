@@ -225,7 +225,7 @@ export async function publishApplication(appPath: string, config: EnvironmentCon
 }
 
 export async function deleteApplications(config: EnvironmentConfig, deleteAll = false): Promise<void> {
-    const suffix = getSuffix();
+    const suffix = getSuffix(/* requireDifferentiator */ !deleteAll);
     const listResponse = await execCliCmd("apps list");
     const allApps = (listResponse[0].data as string[])
         .map(a => a.split(" ")[0])
