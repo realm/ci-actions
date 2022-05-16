@@ -54060,12 +54060,16 @@ function deleteApplications(config, deleteAll = false) {
             .filter(a => deleteAll || a.includes(suffix));
         for (const app of allApps) {
             try {
-                const describeResponse = yield execCliCmd(`apps describe -a ${app}`);
-                if (((_b = (_a = describeResponse[0]) === null || _a === void 0 ? void 0 : _a.doc.data_sources[0]) === null || _b === void 0 ? void 0 : _b.data_source) === config.clusterName) {
-                    core.info(`Deleting ${app}`);
-                    yield execCliCmd(`apps delete -a ${app}`);
-                    core.info(`Deleted ${app}`);
+                if (!deleteAll) {
+                    const describeResponse = yield execCliCmd(`apps describe -a ${app}`);
+                    if (((_b = (_a = describeResponse[0]) === null || _a === void 0 ? void 0 : _a.doc.data_sources[0]) === null || _b === void 0 ? void 0 : _b.data_source) !== config.clusterName) {
+                        core.info(`Skipping deletion of ${app} because it is not linked to the current cluster`);
+                        continue;
+                    }
                 }
+                core.info(`Deleting ${app}`);
+                yield execCliCmd(`apps delete -a ${app}`);
+                core.info(`Deleted ${app}`);
             }
             catch (error) {
                 core.warning(`Failed to delete ${app}: ${error.message}`);

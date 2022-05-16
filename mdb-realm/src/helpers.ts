@@ -233,12 +233,17 @@ export async function deleteApplications(config: EnvironmentConfig, deleteAll = 
 
     for (const app of allApps) {
         try {
-            const describeResponse = await execCliCmd(`apps describe -a ${app}`);
-            if (describeResponse[0]?.doc.data_sources[0]?.data_source === config.clusterName) {
-                core.info(`Deleting ${app}`);
-                await execCliCmd(`apps delete -a ${app}`);
-                core.info(`Deleted ${app}`);
+            if (!deleteAll) {
+                const describeResponse = await execCliCmd(`apps describe -a ${app}`);
+                if (describeResponse[0]?.doc.data_sources[0]?.data_source !== config.clusterName) {
+                    core.info(`Skipping deletion of ${app} because it is not linked to the current cluster`);
+                    continue;
+                }
             }
+
+            core.info(`Deleting ${app}`);
+            await execCliCmd(`apps delete -a ${app}`);
+            core.info(`Deleted ${app}`);
         } catch (error: any) {
             core.warning(`Failed to delete ${app}: ${error.message}`);
         }
