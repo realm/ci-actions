@@ -53786,6 +53786,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.deployCluster = void 0;
 const core = __importStar(__webpack_require__(2186));
 const fs = __importStar(__webpack_require__(5747));
 const helpers_1 = __webpack_require__(3015);
@@ -53794,29 +53795,35 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const config = helpers_1.getConfig();
-            const clusterNames = yield helpers_1.getClusterNames(config);
-            if (clusterNames.includes(config.clusterName)) {
-                const appsPath = core.getInput("appsPath", { required: false });
-                yield helpers_1.createCluster(config);
-                yield helpers_1.waitForClusterDeployment(config);
-                const deployedApps = {};
-                if (appsPath) {
-                    yield helpers_1.configureRealmCli(config);
-                    for (const appPath of fs.readdirSync(appsPath)) {
-                        const deployInfo = yield helpers_1.publishApplication(path_1.default.join(appsPath, appPath), config);
-                        deployedApps[appPath] = deployInfo.id;
-                    }
-                }
-                const deployedAppsOutput = Buffer.from(JSON.stringify(deployedApps)).toString("base64");
-                core.setOutput("deployedApps", deployedAppsOutput);
-            }
-            core.setOutput("clusterName", config.clusterName);
+            const appsPath = core.getInput("appsPath", { required: false });
+            yield deployCluster(config, appsPath);
         }
         catch (error) {
             core.setFailed(`An unexpected error occurred: ${error.message}\n${error.stack}`);
         }
     });
 }
+function deployCluster(config, appsPath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const clusterNames = config.useExistingCluster ? yield helpers_1.getClusters(config) : [];
+        if (!clusterNames.includes(config.clusterName)) {
+            yield helpers_1.createCluster(config);
+            yield helpers_1.waitForClusterDeployment(config);
+            const deployedApps = {};
+            if (appsPath) {
+                yield helpers_1.configureRealmCli(config);
+                for (const appPath of fs.readdirSync(appsPath)) {
+                    const deployInfo = yield helpers_1.publishApplication(path_1.default.join(appsPath, appPath), config);
+                    deployedApps[appPath] = deployInfo.id;
+                }
+            }
+            const deployedAppsOutput = Buffer.from(JSON.stringify(deployedApps)).toString("base64");
+            core.setOutput("deployedApps", deployedAppsOutput);
+        }
+        core.setOutput("clusterName", config.clusterName);
+    });
+}
+exports.deployCluster = deployCluster;
 run();
 exports.default = run;
 
@@ -53827,265 +53834,6 @@ exports.default = run;
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
-<<<<<<< HEAD
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getClusterNames = exports.deleteApplications = exports.publishApplication = exports.configureRealmCli = exports.waitForClusterDeployment = exports.deleteCluster = exports.createCluster = exports.getConfig = void 0;
-const core = __importStar(__webpack_require__(2186));
-const exec = __importStar(__webpack_require__(1514));
-const fs = __importStar(__webpack_require__(5747));
-const path = __importStar(__webpack_require__(5622));
-const urllib = __importStar(__webpack_require__(4783));
-const crypto_1 = __webpack_require__(6417);
-function execCmd(cmd, args) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let stdout = "";
-        let stderr = "";
-        const options = {
-            listeners: {
-                stdout: (data) => {
-                    stdout += data.toString();
-                },
-                stderr: (data) => {
-                    stderr += data.toString();
-                },
-            },
-            failOnStdErr: false,
-            ignoreReturnCode: true,
-        };
-        const exitCode = yield exec.exec(cmd, args, options);
-        if (exitCode !== 0) {
-            throw new Error(`"${cmd}" failed with code ${exitCode} giving error:\n ${stderr.trim()}`);
-        }
-        return stdout.trim();
-    });
-}
-function execCliCmd(cmd, retries = 5) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-            try {
-                let actualCmd = `realm-cli --profile local -f json ${cmd} -y`;
-                if (process.platform === "win32") {
-                    actualCmd = `pwsh -Command "${actualCmd.replace(/"/g, '\\"').split("\n").join("`n")}"`;
-                }
-                const response = yield execCmd(actualCmd);
-                return response
-                    .split(/\r?\n/)
-                    .filter(s => s && s.trim() && !s.includes("Deploying app changes..."))
-                    .map(s => JSON.parse(s));
-            }
-            catch (error) {
-                if (retries-- < 2) {
-                    throw error;
-                }
-                else {
-                    core.info(`Failed to execute ${cmd} with ${error}. Retrying ${retries} more time(s)`);
-                }
-            }
-        }
-    });
-}
-function execAtlasRequest(atlasUrl, method, route, config, payload) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const url = `${atlasUrl}/api/atlas/v1.0/groups/${config.projectId}/${route}`;
-        const request = {
-            digestAuth: `${config.apiKey}:${config.privateApiKey}`,
-            method,
-            headers: {
-                "content-type": "application/json",
-                accept: "application/json",
-            },
-        };
-        if (payload) {
-            request.data = JSON.stringify(payload);
-        }
-        const response = yield urllib.request(url, request);
-        if (response.status < 200 || response.status > 300) {
-            throw new Error(`Failed to execute ${request.method} ${route}: ${response.status}: ${response.data}`);
-        }
-        return JSON.parse(response.data);
-    });
-}
-function getSuffix() {
-    const differentiator = core.getInput("differentiator", { required: true });
-    return crypto_1.createHash("md5")
-        .update(`${getRunId()}-${differentiator}`)
-        .digest("base64")
-        .replace(/\+/g, "")
-        .replace(/\//g, "")
-        .toLowerCase()
-        .substring(0, 8);
-}
-function getRunId() {
-    return process.env.GITHUB_RUN_ID || "";
-}
-function getConfig() {
-    return {
-        projectId: core.getInput("projectId", { required: true }),
-        apiKey: core.getInput("apiKey", { required: true }),
-        privateApiKey: core.getInput("privateApiKey", { required: true }),
-        realmUrl: core.getInput("realmUrl", { required: false }) || "https://realm-dev.mongodb.com",
-        atlasUrl: core.getInput("atlasUrl", { required: false }) || "https://cloud-dev.mongodb.com",
-        clusterName: core.getInput("clusterName", { required: false }) || getSuffix(),
-        useExistingCluster: core.getInput("useExistingCluster", { required: false }).toLowerCase() === "true" || false,
-    };
-}
-exports.getConfig = getConfig;
-function createCluster(config) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const payload = {
-            name: config.clusterName,
-            providerSettings: {
-                instanceSizeName: "M5",
-                providerName: "TENANT",
-                regionName: "US_EAST_1",
-                backingProviderName: "AWS",
-            },
-        };
-        core.info(`Creating Atlas cluster: ${config.clusterName}`);
-        const response = yield execAtlasRequest(config.atlasUrl, "POST", "clusters", config, payload);
-        core.info(`Cluster created: ${JSON.stringify(response)}`);
-    });
-}
-exports.createCluster = createCluster;
-function deleteCluster(config) {
-    return __awaiter(this, void 0, void 0, function* () {
-        core.info(`Deleting Atlas cluster: ${config.clusterName}`);
-        yield execAtlasRequest(config.atlasUrl, "DELETE", `clusters/${config.clusterName}`, config);
-        core.info(`Deleted Atlas cluster: ${config.clusterName}`);
-    });
-}
-exports.deleteCluster = deleteCluster;
-function waitForClusterDeployment(config) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const pollDelay = 5;
-        let attempt = 0;
-        while (attempt++ < 200) {
-            try {
-                const response = yield execAtlasRequest(config.atlasUrl, "GET", `clusters/${config.clusterName}`, config);
-                if (response.stateName === "IDLE") {
-                    return;
-                }
-                core.info(`Cluster state is: ${response.stateName} after ${attempt * pollDelay} seconds. Waiting ${pollDelay} seconds for IDLE`);
-            }
-            catch (error) {
-                core.info(`Failed to check cluster status: ${error.message}`);
-            }
-            yield delay(pollDelay * 1000);
-        }
-        throw new Error(`Cluster failed to deploy after ${100 * pollDelay} seconds`);
-    });
-}
-exports.waitForClusterDeployment = waitForClusterDeployment;
-function configureRealmCli(config) {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield execCmd("npm i -g mongodb-realm-cli");
-        yield execCliCmd(`login --api-key ${config.apiKey} --private-api-key ${config.privateApiKey} --atlas-url ${config.atlasUrl} --realm-url ${config.realmUrl}`);
-    });
-}
-exports.configureRealmCli = configureRealmCli;
-function publishApplication(appPath, config) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const appName = `${path.basename(appPath)}-${getSuffix()}`;
-        core.info(`Creating app ${appName}`);
-        const createResponse = yield execCliCmd(`apps create --name ${appName}`);
-        const appId = createResponse.map(r => r.doc).find(d => d && d.client_app_id).client_app_id;
-        core.info(`Created app ${appName} with Id: ${appId}`);
-        const secrets = readJson(path.join(appPath, "secrets.json"));
-        for (const secret in secrets) {
-            if (secret === "BackingDB_uri") {
-                continue;
-            }
-            core.info(`Importing secret ${secret}`);
-            yield execCliCmd(`secrets create --app ${appId} --name "${secret}" --value "${secrets[secret]}"`);
-        }
-        // This code does the following:
-        // 1. Updates the service type to mongodb-atlas (instead of mongo)
-        // 2. Updates the linked cluster to match the one we just created
-        // 3. Deletes the secret config since that is only relevant for the docker deployment
-        const backingDBConfigPath = path.join(appPath, "services", "BackingDB", "config.json");
-        const backingDBConfig = readJson(backingDBConfigPath);
-        backingDBConfig.type = "mongodb-atlas";
-        backingDBConfig.config.clusterName = config.clusterName;
-        delete backingDBConfig.secret_config;
-        writeJson(backingDBConfigPath, backingDBConfig);
-        core.info(`Updated BackingDB config with cluster: ${config.clusterName}`);
-        yield execCliCmd(`push --local ${appPath} --remote ${appId}`);
-        core.info(`Imported ${appName} successfully`);
-        return {
-            id: appId,
-        };
-    });
-}
-exports.publishApplication = publishApplication;
-function deleteApplications(config) {
-    var _a, _b;
-    return __awaiter(this, void 0, void 0, function* () {
-        const suffix = getSuffix();
-        const listResponse = yield execCliCmd("apps list");
-        const allApps = listResponse[0].data.map(a => a.split(" ")[0]).filter(a => a.includes(suffix));
-        for (const app of allApps) {
-            const describeResponse = yield execCliCmd(`apps describe -a ${app}`);
-            if (((_b = (_a = describeResponse[0]) === null || _a === void 0 ? void 0 : _a.doc.data_sources[0]) === null || _b === void 0 ? void 0 : _b.data_source) === config.clusterName) {
-                core.info(`Deleting ${app}`);
-                yield execCliCmd(`apps delete -a ${app}`);
-                core.info(`Deleted ${app}`);
-            }
-        }
-    });
-}
-exports.deleteApplications = deleteApplications;
-function getClusterNames(config) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const response = yield execAtlasRequest(config.atlasUrl, "GET", `clusters`, config);
-        return response.map((r) => r.name);
-    });
-}
-exports.getClusterNames = getClusterNames;
-function readJson(filePath) {
-    const content = fs.readFileSync(filePath, { encoding: "utf8" });
-    return JSON.parse(content);
-}
-function writeJson(filePath, contents) {
-    fs.writeFileSync(filePath, JSON.stringify(contents));
-}
-function delay(ms) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(resolve => {
-            setTimeout(resolve, ms);
-        });
-    });
-}
-=======
 
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -54216,7 +53964,8 @@ function getConfig(requireDifferentiator = true) {
         privateApiKey: core.getInput("privateApiKey", { required: true }),
         realmUrl: core.getInput("realmUrl", { required: false }) || "https://realm-dev.mongodb.com",
         atlasUrl: core.getInput("atlasUrl", { required: false }) || "https://cloud-dev.mongodb.com",
-        clusterName: getSuffix(requireDifferentiator),
+        clusterName: core.getInput("clusterName", { required: false }) || getSuffix(requireDifferentiator),
+        useExistingCluster: core.getInput("useExistingCluster", { required: false }).toLowerCase() === "true" || false,
     };
 }
 exports.getConfig = getConfig;
@@ -54357,7 +54106,6 @@ function delay(ms) {
         });
     });
 }
->>>>>>> main
 
 
 /***/ }),

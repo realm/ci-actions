@@ -111,7 +111,7 @@ export function getConfig(requireDifferentiator = true): EnvironmentConfig {
         realmUrl: core.getInput("realmUrl", { required: false }) || "https://realm-dev.mongodb.com",
         atlasUrl: core.getInput("atlasUrl", { required: false }) || "https://cloud-dev.mongodb.com",
         clusterName: core.getInput("clusterName", { required: false }) || getSuffix(requireDifferentiator),
-        useExistingCluster: core.getInput("useExistingCluster", { required: false }).toLowerCase() === "true" || false,  
+        useExistingCluster: core.getInput("useExistingCluster", { required: false }).toLowerCase() === "true" || false,
     };
 }
 
@@ -249,11 +249,6 @@ export async function deleteApplications(config: EnvironmentConfig, deleteAll = 
             core.warning(`Failed to delete ${app}: ${error.message}`);
         }
     }
-}
-
-export async function getClusterNames(config: EnvironmentConfig): Promise<string[]> {
-    const response = await execAtlasRequest(config.atlasUrl, "GET", `clusters`, config);
-    return response.map((r: any) => r.name);
 }
 
 function readJson(filePath: string): any {

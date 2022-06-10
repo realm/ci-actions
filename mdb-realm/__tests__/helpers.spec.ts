@@ -2,6 +2,7 @@ import { expect } from "chai";
 import "mocha";
 import { suite, test, timeout } from "@testdeck/mocha";
 import { deleteCluster, getClusters } from "../src/helpers";
+import { deployCluster } from "../src/deployApps";
 import { EnvironmentConfig } from "../src/config";
 
 @suite
@@ -9,12 +10,13 @@ import { EnvironmentConfig } from "../src/config";
 class helpersTests {
     getConfig(): EnvironmentConfig {
         return {
-            apiKey: "set-your-api-key",
-            privateApiKey: "set-your-api-key",
+            apiKey: "ccnsdwnc",
+            privateApiKey: "eac0d02a-924e-4957-9800-1deffb5b54e6",
             atlasUrl: "https://cloud-qa.mongodb.com",
-            projectId: "set-your-project-id",
-            clusterName: "",
+            projectId: "61bc9d442b6ba03a7d9ab71c",
+            clusterName: "ClusterXXX",
             realmUrl: "https://realm-qa.mongodb.com",
+            useExistingCluster: true,
         };
     }
 
@@ -41,5 +43,13 @@ class helpersTests {
         for (const cluster of result) {
             await deleteCluster(config, cluster);
         }
+    }
+
+    @test.skip
+    @timeout(60000)
+    async deployClusterIfMissing(): Promise<void> {
+        const config = this.getConfig();
+        const result = await deployCluster(config, "");
+        expect(result).to.not.be.empty;
     }
 }
