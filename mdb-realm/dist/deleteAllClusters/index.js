@@ -53749,7 +53749,7 @@ XRegExp = XRegExp || (function (undef) {
 
 /***/ }),
 
-/***/ 4509:
+/***/ 3142:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -53782,32 +53782,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__webpack_require__(2186));
-const fs = __importStar(__webpack_require__(5747));
 const helpers_1 = __webpack_require__(3015);
-const path_1 = __importDefault(__webpack_require__(5622));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const config = helpers_1.getConfig();
-            const appsPath = core.getInput("appsPath", { required: false });
-            yield helpers_1.createCluster(config);
-            yield helpers_1.waitForClusterDeployment(config);
-            const deployedApps = {};
-            if (appsPath) {
+            const config = helpers_1.getConfig(/* requireDifferentiator */ false);
+            try {
                 yield helpers_1.configureRealmCli(config);
-                for (const appPath of fs.readdirSync(appsPath)) {
-                    const deployInfo = yield helpers_1.publishApplication(path_1.default.join(appsPath, appPath), config);
-                    deployedApps[appPath] = deployInfo.id;
+                yield helpers_1.deleteApplications(config, /* deleteAll */ true);
+            }
+            catch (error) {
+                core.warning(`Failed to delete applications: ${error.message}`);
+            }
+            const clusters = yield helpers_1.getClusters(config);
+            for (const cluster of clusters) {
+                try {
+                    yield helpers_1.deleteCluster(config, cluster);
+                }
+                catch (error) {
+                    core.warning(`Failed to delete cluster ${cluster}: ${error.message}\n${error.stack}`);
                 }
             }
-            const deployedAppsOutput = Buffer.from(JSON.stringify(deployedApps)).toString("base64");
-            core.setOutput("deployedApps", deployedAppsOutput);
-            core.setOutput("clusterName", config.clusterName);
         }
         catch (error) {
             core.setFailed(`An unexpected error occurred: ${error.message}\n${error.stack}`);
@@ -54453,7 +54450,7 @@ module.exports = require("zlib");;
 /******/ 	// module exports must be returned from runtime so entry inlining is disabled
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(4509);
+/******/ 	return __webpack_require__(3142);
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map
