@@ -1,5 +1,5 @@
-name: cleanup
-description: Deletes a previously created Atlas cluster as well as any apps associated with it
+name: deleteAllClusters
+description: Deletes all BaaS apps and Atlas clusters in a project
 author: Realm
 inputs:
   atlasUrl:
@@ -17,9 +17,6 @@ inputs:
   privateapiKey:
     required: true
     description: The private API key.
-  differentiator:
-    required: true
-    description: Provide a differentiator for the build - e.g. "{{ matrix.os }}-{{ matrix.node-version }}"  or "integration tests"
 runs:
   using: node12
   main: ../dist/cleanup/index.js

@@ -20,8 +20,8 @@ async function run(): Promise<void> {
         if (latestVersionChangelog) {
             await fs.promises.writeFile(latestVersionChangelog, result.latestVersionChanges);
         }
-    } catch (error) {
-        core.setFailed(error.message);
+    } catch (error: any) {
+        core.setFailed(`An unexpected error occurred: ${error.message}\n${error.stack}`);
     }
 }
 

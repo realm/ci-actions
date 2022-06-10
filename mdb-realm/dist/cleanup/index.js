@@ -53789,8 +53789,13 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const config = helpers_1.getConfig();
-            yield helpers_1.configureRealmCli(config);
-            yield helpers_1.deleteApplications(config);
+            try {
+                yield helpers_1.configureRealmCli(config);
+                yield helpers_1.deleteApplications(config);
+            }
+            catch (error) {
+                core.warning(`Failed to delete applications: ${error.message}`);
+            }
             yield helpers_1.deleteCluster(config);
         }
         catch (error) {
@@ -53838,7 +53843,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getClusterNames = exports.deleteApplications = exports.publishApplication = exports.configureRealmCli = exports.waitForClusterDeployment = exports.deleteCluster = exports.createCluster = exports.getConfig = void 0;
+exports.deleteApplications = exports.publishApplication = exports.configureRealmCli = exports.waitForClusterDeployment = exports.deleteCluster = exports.getClusters = exports.createCluster = exports.getConfig = void 0;
 const core = __importStar(__webpack_require__(2186));
 const exec = __importStar(__webpack_require__(1514));
 const fs = __importStar(__webpack_require__(5747));
@@ -53915,28 +53920,30 @@ function execAtlasRequest(atlasUrl, method, route, config, payload) {
         return JSON.parse(response.data);
     });
 }
-function getSuffix() {
-    const differentiator = core.getInput("differentiator", { required: true });
-    return crypto_1.createHash("md5")
-        .update(`${getRunId()}-${differentiator}`)
-        .digest("base64")
-        .replace(/\+/g, "")
-        .replace(/\//g, "")
-        .toLowerCase()
-        .substring(0, 8);
+function getSuffix(requireDifferentiator = true) {
+    const differentiator = core.getInput("differentiator", { required: requireDifferentiator });
+    if (differentiator) {
+        return crypto_1.createHash("md5")
+            .update(`${getRunId()}-${differentiator}`)
+            .digest("base64")
+            .replace(/\+/g, "")
+            .replace(/\//g, "")
+            .toLowerCase()
+            .substring(0, 8);
+    }
+    return "no-cluster";
 }
 function getRunId() {
     return process.env.GITHUB_RUN_ID || "";
 }
-function getConfig() {
+function getConfig(requireDifferentiator = true) {
     return {
         projectId: core.getInput("projectId", { required: true }),
         apiKey: core.getInput("apiKey", { required: true }),
         privateApiKey: core.getInput("privateApiKey", { required: true }),
         realmUrl: core.getInput("realmUrl", { required: false }) || "https://realm-dev.mongodb.com",
         atlasUrl: core.getInput("atlasUrl", { required: false }) || "https://cloud-dev.mongodb.com",
-        clusterName: core.getInput("clusterName", { required: false }) || getSuffix(),
-        useExistingCluster: core.getInput("useExistingCluster", { required: false }).toLowerCase() === "true" || false,
+        clusterName: getSuffix(requireDifferentiator),
     };
 }
 exports.getConfig = getConfig;
@@ -53957,11 +53964,19 @@ function createCluster(config) {
     });
 }
 exports.createCluster = createCluster;
-function deleteCluster(config) {
+function getClusters(config) {
     return __awaiter(this, void 0, void 0, function* () {
-        core.info(`Deleting Atlas cluster: ${config.clusterName}`);
-        yield execAtlasRequest(config.atlasUrl, "DELETE", `clusters/${config.clusterName}`, config);
-        core.info(`Deleted Atlas cluster: ${config.clusterName}`);
+        const response = yield execAtlasRequest(config.atlasUrl, "GET", "clusters", config);
+        return response.results.map((c) => c.name);
+    });
+}
+exports.getClusters = getClusters;
+function deleteCluster(config, clusterName) {
+    return __awaiter(this, void 0, void 0, function* () {
+        clusterName = clusterName || config.clusterName;
+        core.info(`Deleting Atlas cluster: ${clusterName}`);
+        yield execAtlasRequest(config.atlasUrl, "DELETE", `clusters/${clusterName}`, config);
+        core.info(`Deleted Atlas cluster: ${clusterName}`);
     });
 }
 exports.deleteCluster = deleteCluster;
@@ -54027,30 +54042,34 @@ function publishApplication(appPath, config) {
     });
 }
 exports.publishApplication = publishApplication;
-function deleteApplications(config) {
+function deleteApplications(config, deleteAll = false) {
     var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
-        const suffix = getSuffix();
+        const suffix = getSuffix(/* requireDifferentiator */ !deleteAll);
         const listResponse = yield execCliCmd("apps list");
-        const allApps = listResponse[0].data.map(a => a.split(" ")[0]).filter(a => a.includes(suffix));
+        const allApps = listResponse[0].data
+            .map(a => a.split(" ")[0])
+            .filter(a => deleteAll || a.includes(suffix));
         for (const app of allApps) {
-            const describeResponse = yield execCliCmd(`apps describe -a ${app}`);
-            if (((_b = (_a = describeResponse[0]) === null || _a === void 0 ? void 0 : _a.doc.data_sources[0]) === null || _b === void 0 ? void 0 : _b.data_source) === config.clusterName) {
+            try {
+                if (!deleteAll) {
+                    const describeResponse = yield execCliCmd(`apps describe -a ${app}`);
+                    if (((_b = (_a = describeResponse[0]) === null || _a === void 0 ? void 0 : _a.doc.data_sources[0]) === null || _b === void 0 ? void 0 : _b.data_source) !== config.clusterName) {
+                        core.info(`Skipping deletion of ${app} because it is not linked to the current cluster`);
+                        continue;
+                    }
+                }
                 core.info(`Deleting ${app}`);
                 yield execCliCmd(`apps delete -a ${app}`);
                 core.info(`Deleted ${app}`);
+            }
+            catch (error) {
+                core.warning(`Failed to delete ${app}: ${error.message}`);
             }
         }
     });
 }
 exports.deleteApplications = deleteApplications;
-function getClusterNames(config) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const response = yield execAtlasRequest(config.atlasUrl, "GET", `clusters`, config);
-        return response.map((r) => r.name);
-    });
-}
-exports.getClusterNames = getClusterNames;
 function readJson(filePath) {
     const content = fs.readFileSync(filePath, { encoding: "utf8" });
     return JSON.parse(content);
@@ -54169,7 +54188,7 @@ module.exports = JSON.parse("{\"100\":\"Continue\",\"101\":\"Switching Protocols
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse("{\"name\":\"urllib\",\"version\":\"2.37.4\",\"description\":\"Help in opening URLs (mostly HTTP) in a complex world — basic and digest authentication, redirections, cookies and more.\",\"keywords\":[\"urllib\",\"http\",\"urlopen\",\"curl\",\"wget\",\"request\",\"https\"],\"author\":\"fengmk2 <fengmk2@gmail.com> (https://fengmk2.com)\",\"homepage\":\"https://github.com/node-modules/urllib\",\"main\":\"lib/index.js\",\"types\":\"lib/index.d.ts\",\"files\":[\"lib\"],\"repository\":{\"type\":\"git\",\"url\":\"git://github.com/node-modules/urllib.git\"},\"scripts\":{\"test-local\":\"mocha -t 30000 -r intelli-espower-loader test/*.test.js\",\"test\":\"npm run lint && npm run test-local\",\"test-cov\":\"istanbul cover node_modules/mocha/bin/_mocha -- -t 30000 -r intelli-espower-loader test/*.test.js\",\"ci\":\"npm run lint && npm run test-cov\",\"lint\":\"jshint .\",\"autod\":\"autod -w --prefix '^' -t test -e examples\",\"contributor\":\"git-contributor\"},\"dependencies\":{\"any-promise\":\"^1.3.0\",\"content-type\":\"^1.0.2\",\"debug\":\"^2.6.9\",\"default-user-agent\":\"^1.0.0\",\"digest-header\":\"^0.0.1\",\"ee-first\":\"~1.1.1\",\"formstream\":\"^1.1.0\",\"humanize-ms\":\"^1.2.0\",\"iconv-lite\":\"^0.4.15\",\"ip\":\"^1.1.5\",\"proxy-agent\":\"^5.0.0\",\"pump\":\"^3.0.0\",\"qs\":\"^6.4.0\",\"statuses\":\"^1.3.1\",\"utility\":\"^1.16.1\"},\"devDependencies\":{\"@types/mocha\":\"^5.2.5\",\"@types/node\":\"^10.12.18\",\"agentkeepalive\":\"^4.0.0\",\"autod\":\"*\",\"benchmark\":\"^2.1.4\",\"bluebird\":\"*\",\"busboy\":\"^0.2.14\",\"co\":\"*\",\"coffee\":\"1\",\"egg-ci\":\"^1.15.0\",\"git-contributor\":\"^1.0.10\",\"http-proxy\":\"^1.16.2\",\"intelli-espower-loader\":\"^1.0.1\",\"istanbul\":\"*\",\"jshint\":\"*\",\"mkdirp\":\"^0.5.1\",\"mocha\":\"3\",\"muk\":\"^0.5.3\",\"pedding\":\"^1.1.0\",\"power-assert\":\"^1.4.2\",\"semver\":\"5\",\"spy\":\"^1.0.0\",\"tar\":\"^4.4.8\",\"through2\":\"^2.0.3\",\"typescript\":\"^3.2.2\"},\"engines\":{\"node\":\">= 0.10.0\"},\"ci\":{\"type\":\"github\",\"os\":{\"github\":\"linux, windows, macos\"},\"version\":\"8, 10, 12, 14\"},\"license\":\"MIT\"}");
+module.exports = JSON.parse("{\"_args\":[[\"urllib@2.37.4\",\"/Users/nikolairinchev/work/dotnet/.github/actions/mdb-realm\"]],\"_from\":\"urllib@2.37.4\",\"_id\":\"urllib@2.37.4\",\"_inBundle\":false,\"_integrity\":\"sha512-1l+eKrnE5d0TyNeaMw0cxLjA+1jGjacJYxvZ+ZP7l99kSv+dZmP5KTyp3KRV33pw0fsyqAY+rokCpfTFfwVfug==\",\"_location\":\"/urllib\",\"_phantomChildren\":{},\"_requested\":{\"type\":\"version\",\"registry\":true,\"raw\":\"urllib@2.37.4\",\"name\":\"urllib\",\"escapedName\":\"urllib\",\"rawSpec\":\"2.37.4\",\"saveSpec\":null,\"fetchSpec\":\"2.37.4\"},\"_requiredBy\":[\"/\"],\"_resolved\":\"https://registry.npmjs.org/urllib/-/urllib-2.37.4.tgz\",\"_spec\":\"2.37.4\",\"_where\":\"/Users/nikolairinchev/work/dotnet/.github/actions/mdb-realm\",\"author\":{\"name\":\"fengmk2\",\"email\":\"fengmk2@gmail.com\",\"url\":\"https://fengmk2.com\"},\"bugs\":{\"url\":\"https://github.com/node-modules/urllib/issues\"},\"ci\":{\"type\":\"github\",\"os\":{\"github\":\"linux, windows, macos\"},\"version\":\"8, 10, 12, 14\"},\"dependencies\":{\"any-promise\":\"^1.3.0\",\"content-type\":\"^1.0.2\",\"debug\":\"^2.6.9\",\"default-user-agent\":\"^1.0.0\",\"digest-header\":\"^0.0.1\",\"ee-first\":\"~1.1.1\",\"formstream\":\"^1.1.0\",\"humanize-ms\":\"^1.2.0\",\"iconv-lite\":\"^0.4.15\",\"ip\":\"^1.1.5\",\"proxy-agent\":\"^5.0.0\",\"pump\":\"^3.0.0\",\"qs\":\"^6.4.0\",\"statuses\":\"^1.3.1\",\"utility\":\"^1.16.1\"},\"description\":\"Help in opening URLs (mostly HTTP) in a complex world — basic and digest authentication, redirections, cookies and more.\",\"devDependencies\":{\"@types/mocha\":\"^5.2.5\",\"@types/node\":\"^10.12.18\",\"agentkeepalive\":\"^4.0.0\",\"autod\":\"*\",\"benchmark\":\"^2.1.4\",\"bluebird\":\"*\",\"busboy\":\"^0.2.14\",\"co\":\"*\",\"coffee\":\"1\",\"egg-ci\":\"^1.15.0\",\"git-contributor\":\"^1.0.10\",\"http-proxy\":\"^1.16.2\",\"intelli-espower-loader\":\"^1.0.1\",\"istanbul\":\"*\",\"jshint\":\"*\",\"mkdirp\":\"^0.5.1\",\"mocha\":\"3\",\"muk\":\"^0.5.3\",\"pedding\":\"^1.1.0\",\"power-assert\":\"^1.4.2\",\"semver\":\"5\",\"spy\":\"^1.0.0\",\"tar\":\"^4.4.8\",\"through2\":\"^2.0.3\",\"typescript\":\"^3.2.2\"},\"engines\":{\"node\":\">= 0.10.0\"},\"files\":[\"lib\"],\"homepage\":\"https://github.com/node-modules/urllib\",\"keywords\":[\"urllib\",\"http\",\"urlopen\",\"curl\",\"wget\",\"request\",\"https\"],\"license\":\"MIT\",\"main\":\"lib/index.js\",\"name\":\"urllib\",\"repository\":{\"type\":\"git\",\"url\":\"git://github.com/node-modules/urllib.git\"},\"scripts\":{\"autod\":\"autod -w --prefix '^' -t test -e examples\",\"ci\":\"npm run lint && npm run test-cov\",\"contributor\":\"git-contributor\",\"lint\":\"jshint .\",\"test\":\"npm run lint && npm run test-local\",\"test-cov\":\"istanbul cover node_modules/mocha/bin/_mocha -- -t 30000 -r intelli-espower-loader test/*.test.js\",\"test-local\":\"mocha -t 30000 -r intelli-espower-loader test/*.test.js\"},\"types\":\"lib/index.d.ts\",\"version\":\"2.37.4\"}");
 
 /***/ }),
 

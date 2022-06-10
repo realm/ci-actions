@@ -84,30 +84,34 @@ async function execAtlasRequest(
     return JSON.parse(response.data);
 }
 
-function getSuffix(): string {
-    const differentiator = core.getInput("differentiator", { required: true });
-    return createHash("md5")
-        .update(`${getRunId()}-${differentiator}`)
-        .digest("base64")
-        .replace(/\+/g, "")
-        .replace(/\//g, "")
-        .toLowerCase()
-        .substring(0, 8);
+function getSuffix(requireDifferentiator = true): string {
+    const differentiator = core.getInput("differentiator", { required: requireDifferentiator });
+    if (differentiator) {
+        return createHash("md5")
+            .update(`${getRunId()}-${differentiator}`)
+            .digest("base64")
+            .replace(/\+/g, "")
+            .replace(/\//g, "")
+            .toLowerCase()
+            .substring(0, 8);
+    }
+
+    return "no-cluster";
 }
 
 function getRunId(): string {
     return process.env.GITHUB_RUN_ID || "";
 }
 
-export function getConfig(): EnvironmentConfig {
+export function getConfig(requireDifferentiator = true): EnvironmentConfig {
     return {
         projectId: core.getInput("projectId", { required: true }),
         apiKey: core.getInput("apiKey", { required: true }),
         privateApiKey: core.getInput("privateApiKey", { required: true }),
         realmUrl: core.getInput("realmUrl", { required: false }) || "https://realm-dev.mongodb.com",
         atlasUrl: core.getInput("atlasUrl", { required: false }) || "https://cloud-dev.mongodb.com",
-        clusterName: core.getInput("clusterName", { required: false }) || getSuffix(),
-        useExistingCluster: core.getInput("useExistingCluster", { required: false }).toLowerCase() === "true" || false,
+        clusterName: core.getInput("clusterName", { required: false }) || getSuffix(requireDifferentiator),
+        useExistingCluster: core.getInput("useExistingCluster", { required: false }).toLowerCase() === "true" || false,  
     };
 }
 
@@ -129,12 +133,18 @@ export async function createCluster(config: EnvironmentConfig): Promise<void> {
     core.info(`Cluster created: ${JSON.stringify(response)}`);
 }
 
-export async function deleteCluster(config: EnvironmentConfig): Promise<void> {
-    core.info(`Deleting Atlas cluster: ${config.clusterName}`);
+export async function getClusters(config: EnvironmentConfig): Promise<string[]> {
+    const response = await execAtlasRequest(config.atlasUrl, "GET", "clusters", config);
+    return response.results.map((c: any) => c.name);
+}
 
-    await execAtlasRequest(config.atlasUrl, "DELETE", `clusters/${config.clusterName}`, config);
+export async function deleteCluster(config: EnvironmentConfig, clusterName?: string): Promise<void> {
+    clusterName = clusterName || config.clusterName;
+    core.info(`Deleting Atlas cluster: ${clusterName}`);
 
-    core.info(`Deleted Atlas cluster: ${config.clusterName}`);
+    await execAtlasRequest(config.atlasUrl, "DELETE", `clusters/${clusterName}`, config);
+
+    core.info(`Deleted Atlas cluster: ${clusterName}`);
 }
 
 export async function waitForClusterDeployment(config: EnvironmentConfig): Promise<void> {
@@ -215,17 +225,28 @@ export async function publishApplication(appPath: string, config: EnvironmentCon
     };
 }
 
-export async function deleteApplications(config: EnvironmentConfig): Promise<void> {
-    const suffix = getSuffix();
+export async function deleteApplications(config: EnvironmentConfig, deleteAll = false): Promise<void> {
+    const suffix = getSuffix(/* requireDifferentiator */ !deleteAll);
     const listResponse = await execCliCmd("apps list");
-    const allApps = (listResponse[0].data as string[]).map(a => a.split(" ")[0]).filter(a => a.includes(suffix));
+    const allApps = (listResponse[0].data as string[])
+        .map(a => a.split(" ")[0])
+        .filter(a => deleteAll || a.includes(suffix));
 
     for (const app of allApps) {
-        const describeResponse = await execCliCmd(`apps describe -a ${app}`);
-        if (describeResponse[0]?.doc.data_sources[0]?.data_source === config.clusterName) {
+        try {
+            if (!deleteAll) {
+                const describeResponse = await execCliCmd(`apps describe -a ${app}`);
+                if (describeResponse[0]?.doc.data_sources[0]?.data_source !== config.clusterName) {
+                    core.info(`Skipping deletion of ${app} because it is not linked to the current cluster`);
+                    continue;
+                }
+            }
+
             core.info(`Deleting ${app}`);
             await execCliCmd(`apps delete -a ${app}`);
             core.info(`Deleted ${app}`);
+        } catch (error: any) {
+            core.warning(`Failed to delete ${app}: ${error.message}`);
         }
     }
 }

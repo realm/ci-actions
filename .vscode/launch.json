@@ -35,6 +35,22 @@
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "protocol": "inspector"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug mdb-realm tests",
+            "cwd": "${workspaceFolder}/mdb-realm/",
+            "program": "${workspaceFolder}/mdb-realm/node_modules/mocha/bin/_mocha",
+            "args": [
+                "-r",
+                "ts-node/register",
+                "--colors",
+                "${workspaceFolder}/mdb-realm/__tests__/*.spec.ts",
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "protocol": "inspector"
         }
     ]
 }
