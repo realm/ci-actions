@@ -62,6 +62,8 @@ The action takes the following parameters:
 1. *(Optional)* `appsPath`: the path where the exported apps are located.
 1. *(Optional)* `atlasUrl`: the Atlas URL to deploy against. Default is https://cloud-dev.mongodb.com.
 1. *(Optional)* `realmUrl`: the MongoDB Realm URL to deploy against. Default is https://realm-dev.mongodb.com.
+1. *(Optional)* `clusterName`: the name of the cluster that to be created. If it is not set it is auto-generated.
+1. *(Optional)* `useExistingCluster` the flag that define whether the cluster to be reused in case it already exists. Default is false - always tries to create new cluster.
 
 The action has the following outputs:
 

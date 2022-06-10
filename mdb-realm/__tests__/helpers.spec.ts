@@ -10,11 +10,11 @@ import { EnvironmentConfig } from "../src/config";
 class helpersTests {
     getConfig(): EnvironmentConfig {
         return {
-            apiKey: "ccnsdwnc",
-            privateApiKey: "eac0d02a-924e-4957-9800-1deffb5b54e6",
+            apiKey: "set-your-api-key",
+            privateApiKey: "set-your-api-key",
             atlasUrl: "https://cloud-qa.mongodb.com",
-            projectId: "61bc9d442b6ba03a7d9ab71c",
-            clusterName: "ClusterXXX",
+            projectId: "set-your-project-id",
+            clusterName: "",
             realmUrl: "https://realm-qa.mongodb.com",
             useExistingCluster: true,
         };
