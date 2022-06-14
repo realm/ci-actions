@@ -13,10 +13,7 @@ import { EnvironmentConfig } from "./config";
 
 async function run(): Promise<void> {
     try {
-        const clusterName = core.getInput("clusterName");
-        //Differentiator is required only if cluster name is not provided
-        const notRequireDifferentiator = !clusterName && clusterName.length > 0;
-        const config = getConfig(!notRequireDifferentiator);
+        const config = getConfig();
         const appsPath = core.getInput("appsPath", { required: false });
 
         await deployCluster(config, appsPath);

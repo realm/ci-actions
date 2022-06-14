@@ -58,7 +58,7 @@ The action takes the following parameters:
 1. *(Required)* `projectId`: the Id of the Atlas project where the cluster will be created.
 1. *(Required)* `apiKey`: the public [Atlas API key](https://docs.atlas.mongodb.com/configure-api-access/).
 1. *(Required)* `privateApiKey`: the private [Atlas API key](https://docs.atlas.mongodb.com/configure-api-access/).
-1. *(Optional)* `differentiator`: a string to differentiate this deployment from others in the same workflow. This value will be combined with the Github Actions run id to generate a unique string for each run+target combination. Differentiator is not required in case a specific clusterName is provided.
+1. *(Required)* `differentiator`: a string to differentiate this deployment from others in the same workflow. This value will be combined with the Github Actions run id to generate a unique string for each run+target combination.
 1. *(Optional)* `appsPath`: the path where the exported apps are located.
 1. *(Optional)* `atlasUrl`: the Atlas URL to deploy against. Default is https://cloud-dev.mongodb.com.
 1. *(Optional)* `realmUrl`: the MongoDB Realm URL to deploy against. Default is https://realm-dev.mongodb.com.
