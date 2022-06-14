@@ -53794,7 +53794,10 @@ const path_1 = __importDefault(__webpack_require__(5622));
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const config = helpers_1.getConfig();
+            const clusterName = core.getInput("clusterName");
+            //Differentiator is required only if cluster name is not provided
+            const notRequireDifferentiator = !clusterName && clusterName.length > 0;
+            const config = helpers_1.getConfig(!notRequireDifferentiator);
             const appsPath = core.getInput("appsPath", { required: false });
             yield deployCluster(config, appsPath);
         }

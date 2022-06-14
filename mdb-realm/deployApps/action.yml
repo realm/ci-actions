@@ -21,8 +21,8 @@ inputs:
     required: false
     description: The path to the apps to import into MongoDB Realm.
   differentiator:
-    required: true
-    description: Provide a differentiator for the build - e.g. "{{ matrix.os }}-{{ matrix.node-version }}"  or "integration tests"
+    required: false
+    description: Provide a differentiator for the build - e.g. "{{ matrix.os }}-{{ matrix.node-version }}"  or "integration tests". It is not required in case a specific clusterName is provided.
   clusterName:
     required: false
     description: Provide a specific name of cluster that to be created"
