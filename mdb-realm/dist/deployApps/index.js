@@ -53786,7 +53786,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.deployCluster = void 0;
 const core = __importStar(__webpack_require__(2186));
 const fs = __importStar(__webpack_require__(5747));
 const helpers_1 = __webpack_require__(3015);
@@ -53795,35 +53794,29 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const config = helpers_1.getConfig();
-            const appsPath = core.getInput("appsPath", { required: false });
-            yield deployCluster(config, appsPath);
+            const clusterNames = config.useExistingCluster ? yield helpers_1.getClusters(config) : [];
+            if (!clusterNames.includes(config.clusterName)) {
+                yield helpers_1.createCluster(config);
+                yield helpers_1.waitForClusterDeployment(config);
+                const deployedApps = {};
+                const appsPath = core.getInput("appsPath", { required: false });
+                if (appsPath) {
+                    yield helpers_1.configureRealmCli(config);
+                    for (const appPath of fs.readdirSync(appsPath)) {
+                        const deployInfo = yield helpers_1.publishApplication(path_1.default.join(appsPath, appPath), config);
+                        deployedApps[appPath] = deployInfo.id;
+                    }
+                }
+                const deployedAppsOutput = Buffer.from(JSON.stringify(deployedApps)).toString("base64");
+                core.setOutput("deployedApps", deployedAppsOutput);
+            }
+            core.setOutput("clusterName", config.clusterName);
         }
         catch (error) {
             core.setFailed(`An unexpected error occurred: ${error.message}\n${error.stack}`);
         }
     });
 }
-function deployCluster(config, appsPath) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const clusterNames = config.useExistingCluster ? yield helpers_1.getClusters(config) : [];
-        if (!clusterNames.includes(config.clusterName)) {
-            yield helpers_1.createCluster(config);
-            yield helpers_1.waitForClusterDeployment(config);
-            const deployedApps = {};
-            if (appsPath) {
-                yield helpers_1.configureRealmCli(config);
-                for (const appPath of fs.readdirSync(appsPath)) {
-                    const deployInfo = yield helpers_1.publishApplication(path_1.default.join(appsPath, appPath), config);
-                    deployedApps[appPath] = deployInfo.id;
-                }
-            }
-            const deployedAppsOutput = Buffer.from(JSON.stringify(deployedApps)).toString("base64");
-            core.setOutput("deployedApps", deployedAppsOutput);
-        }
-        core.setOutput("clusterName", config.clusterName);
-    });
-}
-exports.deployCluster = deployCluster;
 run();
 exports.default = run;
 
@@ -53958,13 +53951,17 @@ function getRunId() {
     return process.env.GITHUB_RUN_ID || "";
 }
 function getConfig(requireDifferentiator = true) {
+    var _a;
     return {
         projectId: core.getInput("projectId", { required: true }),
         apiKey: core.getInput("apiKey", { required: true }),
         privateApiKey: core.getInput("privateApiKey", { required: true }),
         realmUrl: core.getInput("realmUrl", { required: false }) || "https://realm-dev.mongodb.com",
         atlasUrl: core.getInput("atlasUrl", { required: false }) || "https://cloud-dev.mongodb.com",
-        clusterName: core.getInput("clusterName", { required: false }) || getSuffix(requireDifferentiator),
+        clusterName: core.getInput("clusterName", { required: false }) ||
+            getSuffix(
+            /*requireDifferentiator*/
+            requireDifferentiator || ((_a = core.getInput("clusterName", { required: false })) !== null && _a !== void 0 ? _a : "").trim() === ""),
         useExistingCluster: core.getInput("useExistingCluster", { required: false }).toLowerCase() === "true" || false,
     };
 }

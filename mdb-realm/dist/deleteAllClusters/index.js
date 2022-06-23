@@ -53945,13 +53945,17 @@ function getRunId() {
     return process.env.GITHUB_RUN_ID || "";
 }
 function getConfig(requireDifferentiator = true) {
+    var _a;
     return {
         projectId: core.getInput("projectId", { required: true }),
         apiKey: core.getInput("apiKey", { required: true }),
         privateApiKey: core.getInput("privateApiKey", { required: true }),
         realmUrl: core.getInput("realmUrl", { required: false }) || "https://realm-dev.mongodb.com",
         atlasUrl: core.getInput("atlasUrl", { required: false }) || "https://cloud-dev.mongodb.com",
-        clusterName: core.getInput("clusterName", { required: false }) || getSuffix(requireDifferentiator),
+        clusterName: core.getInput("clusterName", { required: false }) ||
+            getSuffix(
+            /*requireDifferentiator*/
+            requireDifferentiator || ((_a = core.getInput("clusterName", { required: false })) !== null && _a !== void 0 ? _a : "").trim() === ""),
         useExistingCluster: core.getInput("useExistingCluster", { required: false }).toLowerCase() === "true" || false,
     };
 }

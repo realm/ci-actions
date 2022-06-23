@@ -2,7 +2,6 @@ import { expect } from "chai";
 import "mocha";
 import { suite, test, timeout } from "@testdeck/mocha";
 import { deleteCluster, getClusters } from "../src/helpers";
-import { deployCluster } from "../src/deployApps";
 import { EnvironmentConfig } from "../src/config";
 
 @suite
@@ -43,13 +42,5 @@ class helpersTests {
         for (const cluster of result) {
             await deleteCluster(config, cluster);
         }
-    }
-
-    @test.skip
-    @timeout(60000)
-    async deployClusterIfMissing(): Promise<void> {
-        const config = this.getConfig();
-        const result = await deployCluster(config, "");
-        expect(result).to.not.be.empty;
     }
 }
