@@ -110,7 +110,13 @@ export function getConfig(requireDifferentiator = true): EnvironmentConfig {
         privateApiKey: core.getInput("privateApiKey", { required: true }),
         realmUrl: core.getInput("realmUrl", { required: false }) || "https://realm-dev.mongodb.com",
         atlasUrl: core.getInput("atlasUrl", { required: false }) || "https://cloud-dev.mongodb.com",
-        clusterName: getSuffix(requireDifferentiator),
+        clusterName:
+            core.getInput("clusterName", { required: false }) ||
+            getSuffix(
+                /*requireDifferentiator*/
+                requireDifferentiator || (core.getInput("clusterName", { required: false }) ?? "").trim() === "",
+            ),
+        useExistingCluster: core.getInput("useExistingCluster", { required: false }).toLowerCase() === "true" || false,
     };
 }
 

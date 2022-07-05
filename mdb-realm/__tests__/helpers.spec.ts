@@ -15,6 +15,7 @@ class helpersTests {
             projectId: "set-your-project-id",
             clusterName: "",
             realmUrl: "https://realm-qa.mongodb.com",
+            useExistingCluster: true,
         };
     }
 
