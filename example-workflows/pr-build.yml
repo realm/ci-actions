@@ -1,0 +1,323 @@
+name: PR Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+env:
+  REALM_CI: true
+
+jobs:
+
+  deploy-cluster:
+    runs-on: ubuntu-latest
+    name: Deploy Cluster
+    outputs:
+      clusterName: ${{ steps.deploy-mdb-apps.outputs.clusterName }}
+    steps:
+      - uses: realm/ci-actions/mdb-realm/deployApps@master
+        id: deploy-mdb-apps
+        with:
+          projectId: ${{ secrets.ATLAS_QA_PROJECT_ID}}
+          realmUrl: ${{ secrets.REALM_QA_BASE_URL }}
+          atlasUrl: ${{ secrets.ATLAS_QA_BASE_URL}}
+          apiKey: ${{ secrets.ATLAS_QA_PUBLIC_API_KEY}}
+          privateApiKey: ${{ secrets.ATLAS_QA_PRIVATE_API_KEY }}
+          differentiator: '*my-repo*'
+
+  # build-native will build the native binaries for all platforms the SDK supports
+  # They are built as a matrix to optimize parallelization - each architecture is
+  # built separately. Some SDKs can consume individual binaries, while others require
+  # them to be stitched together. See https://github.com/realm/realm-dart/blob/master/.github/workflows/binary-combine-ios.yml
+  # for an example of building an xcframework from the individual frameworks.
+  build-native:
+    name: Build Native Binaries
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos
+            platform: ios
+            architecture: Simulator
+          - os: macos
+            platform: ios
+            architecture: Device
+          - os: macos
+            platform: ios
+            architecture: Catalyst
+          - os: macos
+            platform: macos
+            architecture: x64
+          - os: macos
+            platform: macos
+            architecture: arm64
+          - os: ubuntu
+            platform: linux
+            architecture: x64
+          - os: windows
+            platform: windows
+            architecture: x64
+          - os: ubuntu
+            platform: android
+            architecture: arm64
+          - os: ubuntu
+            platform: android
+            architecture: armv7
+          - os: ubuntu
+            platform: android
+            architecture: x86
+          - os: ubuntu
+            platform: android
+            architecture: x64
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v2
+          with:
+            submodules: true
+        - name: Check cache
+          id: check-cache
+          uses: nirinchev/cache@d7c96a77c26ab70dd32b202c885cb4b34d95d8a8
+          with:
+            path: ./native/build/**
+            key: native--${{ matrix.platform }}-${{ matrix.arch }}-${{hashFiles('./native/**')}}
+        - name: Build binaries
+          run: ./native/build-${{ matrix.platform }}.sh ${{ matrix.arch }} -Configuration Release
+          if: steps.check-cache.outputs.cache-hit != 'true'
+        - name: Store artifacts for native-${{ matrix.platform }}-${{ matrix.arch }}
+          uses: actions/upload-artifact@v2
+          with:
+            name: native--${{ matrix.platform }}-${{ matrix.arch }}
+            path: ${{ github.workspace }}/native/build/**
+            retention-days: 1
+
+  build-package:
+    runs-on: ubuntu-latest
+    name: Package
+    outputs:
+      package_version: ${{ steps.get-version.outputs.version }}
+    timeout-minutes: 30
+    needs:
+      - build-native
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: false
+
+      # Set the version suffix:
+      #   - for builds from main, the suffix is -alpha.*run-number* (e.g. -alpha.1234)
+      #   - for pr builds that are not releases, the suffix is -pr-*pr number*.*run-number* (e.g. -pr-384.3)
+      #   - for pr builds from release branches, there's no suffix
+      - name: Set version suffix
+        id: set-version-suffix
+        run: |
+          $suffix = ""
+          if ($env:GITHUB_EVENT_NAME -eq "pull_request")
+          {
+            if (-Not "${{ github.head_ref }}".Contains("release"))
+            {
+              $suffix = "pr-${{ github.event.number }}.$env:GITHUB_RUN_NUMBER"
+            }
+          }
+          else
+          {
+            $suffix = "alpha.$env:GITHUB_RUN_NUMBER"
+          }
+          echo "::set-output name=build_suffix::$suffix"
+
+      # Fetch the native binaries that we'll include in our package
+      - name: Fetch artifacts for macos-x64
+        uses: actions/download-artifact@v2
+        with:
+          name: native-macos-x64
+          path: native/build
+
+      - name: Fetch artifacts for macos-arm64
+        uses: actions/download-artifact@v2
+        with:
+          name: native-macos-arm64
+          path: native/build
+
+      - name: Fetch artifacts for linux-x64
+        uses: actions/download-artifact@v2
+        with:
+          name: native-linux-x64
+          path: native/build
+
+      - name: Fetch artifacts for ios-simulator
+        uses: actions/download-artifact@v2
+        with:
+          name: native-ios-simulator
+          path: native/build
+
+      - name: Fetch artifacts for ios-device
+        uses: actions/download-artifact@v2
+        with:
+          name: native-ios-device
+          path: native/build
+
+      - name: Fetch artifacts for ios-catalyst
+        uses: actions/download-artifact@v2
+        with:
+          name: native-ios-catalyst
+          path: native/build
+
+      - name: Fetch artifacts for android-armv7
+        uses: actions/download-artifact@v2
+        with:
+          name: native-android-armv7
+          path: native/build
+
+      - name: Fetch artifacts for android-arm64
+        uses: actions/download-artifact@v2
+        with:
+          name: native-android-arm64
+          path: native/build
+
+      - name: Fetch artifacts for android-x86
+        uses: actions/download-artifact@v2
+        with:
+          name: native-android-x86
+          path: native/build
+
+      - name: Fetch artifacts for android-x64
+        uses: actions/download-artifact@v2
+        with:
+          name: native-android-x64
+          path: native/build
+
+      - name: Fetch artifacts for windows-x64
+        uses: actions/download-artifact@v2
+        with:
+          name: native-windows-x64
+          path: native/build
+
+      - name: Build package
+        run: build-package.sh -versionSuffix ${{ steps.set-version-suffix.outputs.build_suffix }}
+
+      # Extract version from a package called Realm.10.12.3-alpha.1234.package. You'll typically need to adapt that or use
+      # a different mechanism
+      - name: Read version
+        id: get-version
+        run: |
+          cd packages
+          pkgVersion=$(find . -type f -iname "Realm.*.package" -exec basename {} \; | sed -n 's/Realm\.\(.*\)\.package$/\1/p')
+          echo "::set-output name=version::$pkgVersion"
+
+      - name: Store artifacts for Realm.${{ steps.get-version.outputs.version }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: Realm.${{ steps.get-version.outputs.version }}
+          path: ${{ github.workspace }}/packages/Realm.${{ steps.get-version.outputs.version }}.package
+          retention-days: ${{ github.event_name != 'pull_request' && 30 || 1 }}
+
+  test-ios:
+    name: Test iOS
+    runs-on: macos-latest
+    needs:
+      - build-package
+      - deploy-cluster
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: false
+
+      - name: Fetch Realm.package
+        uses: actions/download-artifact@v2
+        with:
+          name: Realm.${{ needs.build-native.outputs.package_version }}
+          path: ${{ github.workspace }}/Realm/packages/
+
+      - name: Build test project
+        run: Tests/iOS/build-tests.sh -packageVersion ${{ needs.build-native.outputs.package_version }}
+
+      - name: Run the tests
+        uses: realm/ci-actions/run-ios-simulator@v1
+        with:
+          appPath: Tests/iOS/build/Tests.iOS.app
+          bundleId: io.realm.tests
+          iphoneToSimulate: iPhone-8
+          arguments: --headless --result=${{ github.workspace }}/TestResults.iOS.xml --baasurl=${{ secrets.REALM_QA_BASE_URL }} --baascluster=${{ needs.deploy-cluster.outputs.clusterName }} --baasapikey=${{ secrets.ATLAS_QA_PUBLIC_API_KEY}} --baasprivateapikey=${{ secrets.ATLAS_QA_PRIVATE_API_KEY}} --baasprojectid=${{ secrets.ATLAS_QA_PROJECT_ID }} --baasdifferentiator=ios
+
+      - name: Publish Unit Test Results
+        uses: LaPeste/test-reporter@b8a650f4490e7472b930f56bbb92c7b42dc5db15
+        if: always()
+        with:
+          name: Results iOS
+          path: TestResults.iOS.xml
+          reporter: java-junit
+          list-suites: failed
+          list-tests: failed
+          path-replace-backslashes: true
+          fail-on-error: false
+
+  test-code-coverage:
+    name: Test Code Coverage
+    runs-on: ubuntu-latest
+    needs:
+      - build-package
+      - deploy-cluster
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          submodules: false
+
+      - name: Fetch Realm.package
+        uses: actions/download-artifact@v2
+        with:
+          name: Realm.${{ needs.build-native.outputs.package_version }}
+          path: ${{ github.workspace }}/Realm/packages/
+
+      - name: Build test project
+        run: Tests/Linux/build-tests.sh -packageVersion ${{ needs.build-native.outputs.package_version }}
+
+      - name: Run tests
+        run: Tests/Linux/build/realm-tests --coverage=lcov --coverage-rport=./report.lcov --result=${{ github.workspace }}/TestResults.Linux.xml --baasurl=${{ secrets.REALM_QA_BASE_URL }} --baascluster=${{ needs.deploy-cluster.outputs.clusterName }} --baasapikey=${{ secrets.ATLAS_QA_PUBLIC_API_KEY}} --baasprivateapikey=${{ secrets.ATLAS_QA_PRIVATE_API_KEY}} --baasprojectid=${{ secrets.ATLAS_QA_PROJECT_ID }} --baasdifferentiator=linux
+
+      - name: Publish Coverage
+        id: publish-coveralls
+        uses: coverallsapp/github-action@9ba913c152ae4be1327bfb9085dc806cedb44057
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: ./report.lcov
+          git-commit: ${{ github.event.pull_request.head.sha }}
+
+      - name: Output Coveralls response
+        run: echo ${{ steps.publish-coveralls.outputs.coveralls-api-result }}
+
+      - name: Publish Unit Test Results
+        uses: LaPeste/test-reporter@b8a650f4490e7472b930f56bbb92c7b42dc5db15
+        if: always()
+        with:
+          name: Results Linux
+          path: TestResults.Linux.xml
+          reporter: java-junit
+          list-suites: failed
+          list-tests: failed
+          path-replace-backslashes: true
+          fail-on-error: false
+
+  # ... Remaining test platforms
+
+  cleanup:
+    if: always()
+    runs-on: ubuntu-latest
+    name: Cleanup
+    needs:
+      - test-ios
+      - test-linux
+      # - other tests platforms
+    timeout-minutes: 5
+    steps:
+    - uses: realm/ci-actions/mdb-realm/cleanup@master
+      with:
+        projectId: ${{ secrets.ATLAS_QA_PROJECT_ID}}
+        realmUrl: ${{ secrets.REALM_QA_BASE_URL }}
+        atlasUrl: ${{ secrets.ATLAS_QA_BASE_URL}}
+        apiKey: ${{ secrets.ATLAS_QA_PUBLIC_API_KEY}}
+        privateApiKey: ${{ secrets.ATLAS_QA_PRIVATE_API_KEY }}
+        differentiator: '*my-repo*'
