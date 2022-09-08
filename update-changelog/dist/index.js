@@ -39,47 +39,72 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.updateChangelogContent = exports.processChangelog = void 0;
+exports.updateChangelogContent = exports.processChangelog = exports.suggestNewVersion = void 0;
 const semver = __importStar(__webpack_require__(1383));
 const moment_1 = __importDefault(__webpack_require__(9623));
 const fs = __importStar(__webpack_require__(5747));
 const changelogRegex = /^## (?<currentVersion>[^\n]*)[^#]*(?<sections>.*?)\n## (?<prevVersion>[^ ]*)/gms;
 const sectionsRegex = /### (?<sectionName>[^\n]*)(?<sectionContent>[^#]*)/gm;
-function processChangelog(changelog, versionSuffix) {
+function matchChangelog(changelog) {
     changelogRegex.lastIndex = 0;
-    sectionsRegex.lastIndex = 0;
-    const changelogMatch = changelogRegex.exec(changelog);
-    if (!changelogMatch || !changelogMatch.groups) {
+    const match = changelogRegex.exec(changelog);
+    if (!match || !match.groups) {
         throw new Error(`Failed to match changelog: ${changelog}`);
     }
-    const prevVersion = changelogMatch.groups["prevVersion"];
-    let newVersion = prevVersion;
+    return match.groups;
+}
+function matchSections(sections) {
+    const match = sectionsRegex.exec(sections);
+    if (match && match.groups) {
+        return match;
+    }
+    else if (match) {
+        throw new Error(`Failed to match sections: ${sections}`);
+    }
+    else {
+        return null;
+    }
+}
+function suggestNewVersion(changelog, versionSuffix = "") {
+    const { prevVersion, sections } = matchChangelog(changelog);
     const parsedPrevVersion = semver.parse(prevVersion);
     if (!parsedPrevVersion) {
         throw new Error(`Failed to parse previous version: ${prevVersion}`);
     }
     if (parsedPrevVersion.prerelease.length) {
-        newVersion = semver.inc(prevVersion, "prerelease");
-    }
-    else {
-        let sectionMatch;
-        while ((sectionMatch = sectionsRegex.exec(changelogMatch.groups["sections"]))) {
-            if (!sectionMatch.groups) {
-                throw new Error(`Failed to match sections: ${changelogMatch.groups["sections"]}`);
-            }
-            if (!hasActualChanges(sectionMatch.groups["sectionContent"])) {
-                // If the section doesn't have changes - i.e. it contains `* None`, remove it altogether
-                changelog = changelog.replace(sectionMatch[0], "");
-                continue;
-            }
-            const inferredNewVersion = getNextVersion(prevVersion, sectionMatch.groups["sectionName"]);
-            if (inferredNewVersion && semver.gt(inferredNewVersion, newVersion)) {
-                newVersion = inferredNewVersion;
-            }
+        const nextPrereleaseVersion = semver.inc(prevVersion, "prerelease");
+        if (nextPrereleaseVersion) {
+            return nextPrereleaseVersion;
         }
     }
-    newVersion = `${newVersion}${versionSuffix || ""}`;
-    const versionToReplace = changelogMatch.groups["currentVersion"];
+    let newVersion = prevVersion;
+    let sectionMatch;
+    sectionsRegex.lastIndex = 0;
+    while ((sectionMatch = matchSections(sections))) {
+        if (!hasActualChanges(sectionMatch.groups.sectionContent)) {
+            continue;
+        }
+        const inferredNewVersion = getNextVersion(prevVersion, sectionMatch.groups.sectionName);
+        if (inferredNewVersion && semver.gt(inferredNewVersion, newVersion)) {
+            newVersion = inferredNewVersion;
+        }
+    }
+    return newVersion + versionSuffix;
+}
+exports.suggestNewVersion = suggestNewVersion;
+function processChangelog(changelog, versionSuffix, versionOverride) {
+    const newVersion = versionOverride ? versionOverride : suggestNewVersion(changelog, versionSuffix);
+    const { sections, currentVersion, prevVersion } = matchChangelog(changelog);
+    sectionsRegex.lastIndex = 0;
+    let sectionMatch;
+    while ((sectionMatch = matchSections(sections))) {
+        if (!hasActualChanges(sectionMatch.groups.sectionContent)) {
+            // If the section doesn't have changes - i.e. it contains `* None`, remove it altogether
+            changelog = changelog.replace(sectionMatch[0], "");
+            continue;
+        }
+    }
+    const versionToReplace = currentVersion;
     const todaysDate = moment_1.default().format("YYYY-MM-DD");
     changelog = changelog.replace(`## ${versionToReplace}\n`, `## ${newVersion} (${todaysDate})\n`);
     const latestVersionPattern = `^(?<latestVersionChanges>.+?)(?=\n## ${escapeRegExp(prevVersion)})`;
@@ -95,10 +120,10 @@ function processChangelog(changelog, versionSuffix) {
     };
 }
 exports.processChangelog = processChangelog;
-function updateChangelogContent(path, versionSuffix) {
+function updateChangelogContent(path, versionSuffix, versionOverride) {
     return __awaiter(this, void 0, void 0, function* () {
         const changelog = yield fs.promises.readFile(path, { encoding: "utf-8" });
-        const changelogUpdate = processChangelog(changelog, versionSuffix);
+        const changelogUpdate = processChangelog(changelog, versionSuffix, versionOverride);
         yield fs.promises.writeFile(path, changelogUpdate.updatedChangelog, { encoding: "utf-8" });
         return {
             newVersion: changelogUpdate.newVersion,
@@ -116,14 +141,16 @@ function getNextVersion(prevVersion, sectionName) {
             return semver.inc(prevVersion, "patch");
         case "Enhancements":
             return semver.inc(prevVersion, "minor");
-        case "Breaking Changes":
+        case "Breaking Changes": {
             // Breaking changes don't need incrementing major version when we're pre-v1.
-            if (semver.parse(prevVersion).major === 0) {
+            const parsedPrevVersion = semver.parse(prevVersion);
+            if (parsedPrevVersion && parsedPrevVersion.major === 0) {
                 return semver.inc(prevVersion, "minor");
             }
             return semver.inc(prevVersion, "major");
+        }
         default:
-            return undefined;
+            return null;
     }
 }
 function escapeRegExp(str) {
@@ -177,8 +204,14 @@ function run() {
             if (!fs.existsSync(changelogPath)) {
                 throw new Error(`File ${changelogPath} doesn't exist.`);
             }
+            const versionOverride = core.getInput("version-override", { required: false });
+            if (versionOverride) {
+                core.info(`Creating a new version '${versionOverride}' (overridden)`);
+            }
             const versionSuffix = core.getInput("version-suffix", { required: false });
-            core.info(`Creating a new version with suffix ${versionSuffix}`);
+            if (versionSuffix) {
+                core.info(`Creating a new version with suffix '${versionSuffix}'`);
+            }
             const result = yield helpers_1.updateChangelogContent(changelogPath, versionSuffix);
             core.setOutput("new-version", result.newVersion);
             core.info(`Inferred version: ${result.newVersion}`);
@@ -188,7 +221,7 @@ function run() {
             }
         }
         catch (error) {
-            core.setFailed(error.message);
+            core.setFailed(`An unexpected error occurred: ${error.message}\n${error.stack}`);
         }
     });
 }
