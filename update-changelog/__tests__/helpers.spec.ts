@@ -339,13 +339,29 @@ class helpersTests {
         }
     }
 
-    validateUpdatedChangelogContents(changelog: string, expectedVersion: string) {
+    @test
+    async testChangelogUpdaterWithOverride(): Promise<void> {
+        const tempFile = tmp.tmpNameSync();
+        try {
+            await fs.promises.writeFile(tempFile, minorBumpChangelog);
+            const result = await updateChangelogContent(tempFile, undefined, "1.2.3-rc.1337");
+
+            expect(result.newVersion).to.equal("1.2.3-rc.1337");
+
+            const changelog = await fs.promises.readFile(tempFile, { encoding: "utf-8" });
+            this.validateUpdatedChangelogContents(changelog, "1.2.3-rc.1337");
+        } finally {
+            await fs.promises.unlink(tempFile);
+        }
+    }
+
+    validateUpdatedChangelogContents(changelog: string, expectedVersion: string): void {
         expect(changelog).to.contain(`${this.getExpectedHeader(expectedVersion)}\n`);
 
         expect(changelog).not.to.contain("* None\n");
     }
 
-    getExpectedHeader(expectedVersion: string) {
+    getExpectedHeader(expectedVersion: string): string {
         const todaysDate = moment();
         const year = todaysDate.year().toString().padStart(4, "0");
         const month = (todaysDate.month() + 1).toString().padStart(2, "0");
@@ -354,7 +370,7 @@ class helpersTests {
         return `## ${expectedVersion} (${year}-${month}-${day})`;
     }
 
-    validateExpectedChanges(actual: string, expectedChanges: string, expectedVersion: string) {
+    validateExpectedChanges(actual: string, expectedChanges: string, expectedVersion: string): void {
         const expectedHeader = this.getExpectedHeader(expectedVersion);
         expectedChanges = expectedChanges.trim().replace("## *replace-me*", expectedHeader);
 

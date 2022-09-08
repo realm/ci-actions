@@ -5,6 +5,9 @@ inputs:
   changelog:
     required: true
     description: path to the changelog
+  version:
+    required: false
+    description: an optional override of the version
   version-suffix:
     required: false
     description: an optional suffix to add to the generated version
