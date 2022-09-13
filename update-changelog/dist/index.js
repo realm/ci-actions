@@ -204,7 +204,7 @@ function run() {
             if (!fs.existsSync(changelogPath)) {
                 throw new Error(`File ${changelogPath} doesn't exist.`);
             }
-            const versionOverride = core.getInput("version-override", { required: false });
+            const versionOverride = core.getInput("version", { required: false });
             if (versionOverride) {
                 core.info(`Creating a new version '${versionOverride}' (overridden)`);
             }
@@ -212,7 +212,7 @@ function run() {
             if (versionSuffix) {
                 core.info(`Creating a new version with suffix '${versionSuffix}'`);
             }
-            const result = yield helpers_1.updateChangelogContent(changelogPath, versionSuffix);
+            const result = yield helpers_1.updateChangelogContent(changelogPath, versionSuffix, versionOverride);
             core.setOutput("new-version", result.newVersion);
             core.info(`Inferred version: ${result.newVersion}`);
             const latestVersionChangelog = core.getInput("latest-version-changelog");
