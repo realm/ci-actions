@@ -1,12 +1,12 @@
 import * as core from "@actions/core";
-import { deleteApplications, deleteCluster, getConfig, getClusters } from "./helpers";
+import { deleteApps, deleteCluster, getConfig, getClusters } from "./helpers";
 
 async function run(): Promise<void> {
     try {
         const config = getConfig();
 
         try {
-            await deleteApplications(config, /* deleteAll */ true);
+            await deleteApps(config, /* deleteAll */ true);
         } catch (error: any) {
             core.warning(`Failed to delete applications: ${error.message}`);
         }

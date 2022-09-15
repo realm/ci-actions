@@ -90,7 +90,7 @@ async function waitForClusterDeployment(config: EnvironmentConfig): Promise<void
     throw new Error(`Cluster failed to deploy after ${100 * pollDelay} seconds`);
 }
 
-export async function deleteApplications(config: EnvironmentConfig, deleteAll = false): Promise<void> {
+export async function deleteApps(config: EnvironmentConfig, deleteAll = false): Promise<void> {
     const accessToken = await authenticate(config);
 
     const listResponse = await execRealmRequest("GET", "apps", accessToken, config);

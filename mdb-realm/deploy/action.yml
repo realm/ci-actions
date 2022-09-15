@@ -1,5 +1,5 @@
 name: deploy
-description: Deploys MongoDB Realm apps to a previously created cluster
+description: Deploys an Atlas cluster if one doesn't exist already
 author: Realm
 inputs:
   atlasUrl:
@@ -19,7 +19,7 @@ inputs:
     description: The private API key.
   clusterName:
     required: false
-    description: Provide a specific name of cluster that to be created."
+    description: Provide a specific name of cluster that to be created.
 outputs:
   clusterName:
     description: The name of the created cluster

@@ -1,10 +1,10 @@
-# Deploy MDB Realm apps
+# Deploy Atlas Cluster
 
-This action exposes an API to create an Atlas cluster and then import previously exported MDB Realm applications.
+This action exposes an API to obtain an Atlas cluster. It will create the cluster or use an existing one if it was previously created.
 
 ## deploy
 
-The main action will deploy an M5 Atlas cluster and then import one or several MDB Realm applications using `realm-cli`.
+The action will deploy an M5 Atlas cluster. If `clusterName` is specified, the cluster will use that name, otherwise a hashed 8-character name will be generated from the run id and the attempt id.
 
 ## Usage
 
@@ -13,17 +13,18 @@ deploy-cluster:
   runs-on: ubuntu-latest
     name: Deploy MDB Realm for MyTestTarget
     outputs:
-      atlasUrl: ${{ steps.deploy-mdb-apps.outputs.atlasUrl }}
-      realmUrl: ${{ steps.deploy-mdb-apps.outputs.realmUrl }}
-      clusterName: ${{ steps.deploy-mdb-apps.outputs.clusterName }}
+      atlasUrl: ${{ steps.deploy-cluster.outputs.atlasUrl }}
+      realmUrl: ${{ steps.deploy-cluster.outputs.realmUrl }}
+      clusterName: ${{ steps.deploy-cluster.outputs.clusterName }}
     steps:
     - uses: actions/checkout@v2
     - uses: realm/ci-actions/mdb-realm/deploy@v4
-      id: deploy-mdb-apps
+      id: deploy-cluster
       with:
         projectId: ${{ secrets.ATLAS_PROJECT_ID }}
         apiKey: ${{ secrets.ATLAS_PUBLIC_API_KEY }}
         privateApiKey: ${{ secrets.ATLAS_PRIVATE_API_KEY }}
+    - # optional: run a script/app to deploy the applications prior to the actual test run
 # this is your existing test
 run-my-test-target:
   runs-on: ubuntu-latest

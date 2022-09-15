@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import "mocha";
 import { suite, test, timeout } from "@testdeck/mocha";
-import { createCluster, deleteCluster, getClusters, deleteApplications } from "../src/helpers";
+import { createCluster, deleteCluster, getClusters, deleteApps } from "../src/helpers";
 import { EnvironmentConfig } from "../src/config";
 
 @suite
@@ -30,7 +30,7 @@ class helpersTests {
     async cleanup(): Promise<void> {
         const config = this.getConfig();
 
-        await deleteApplications(config);
+        await deleteApps(config);
 
         await deleteCluster(config);
     }
@@ -47,7 +47,7 @@ class helpersTests {
     @timeout(60000)
     async deleteAllApps(): Promise<void> {
         const config = this.getConfig();
-        await deleteApplications(config, true);
+        await deleteApps(config, true);
     }
 
     @test.skip
