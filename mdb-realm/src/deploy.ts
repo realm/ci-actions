@@ -22,6 +22,7 @@ async function run(): Promise<void> {
     core.setFailed(`Failed to deploy ${config.clusterName} after ${maxAttempts} attempts.`);
 }
 
+// eslint-disable-next-line github/no-then
 run().catch(e => {
     core.setFailed(`An unexpected error occurred: ${e.message}\n${e.stack}`);
 });

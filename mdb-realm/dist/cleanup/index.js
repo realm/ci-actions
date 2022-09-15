@@ -52523,7 +52523,7 @@ function run() {
         try {
             const config = helpers_1.getConfig();
             try {
-                yield helpers_1.deleteApplications(config);
+                yield helpers_1.deleteApps(config);
             }
             catch (error) {
                 core.warning(`Failed to delete applications: ${error.message}`);
@@ -52575,7 +52575,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.deleteApplications = exports.deleteCluster = exports.getClusters = exports.createCluster = exports.getConfig = void 0;
+exports.deleteApps = exports.deleteCluster = exports.getClusters = exports.createCluster = exports.getConfig = void 0;
 const core = __importStar(__webpack_require__(2186));
 const urllib = __importStar(__webpack_require__(4783));
 const crypto_1 = __webpack_require__(6417);
@@ -52658,7 +52658,7 @@ function waitForClusterDeployment(config) {
         throw new Error(`Cluster failed to deploy after ${100 * pollDelay} seconds`);
     });
 }
-function deleteApplications(config, deleteAll = false) {
+function deleteApps(config, deleteAll = false) {
     return __awaiter(this, void 0, void 0, function* () {
         const accessToken = yield authenticate(config);
         const listResponse = yield execRealmRequest("GET", "apps", accessToken, config);
@@ -52679,7 +52679,7 @@ function deleteApplications(config, deleteAll = false) {
         }
     });
 }
-exports.deleteApplications = deleteApplications;
+exports.deleteApps = deleteApps;
 function execRequest(url, method, payload, digestAuth, headers = {}) {
     return __awaiter(this, void 0, void 0, function* () {
         const request = {

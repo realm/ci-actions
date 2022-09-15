@@ -52520,28 +52520,27 @@ const core = __importStar(__webpack_require__(2186));
 const helpers_1 = __webpack_require__(3015);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const config = helpers_1.getConfig();
-            for (let i = 0; i < 5; i++) {
-                try {
-                    yield helpers_1.createCluster(config);
-                    core.setOutput("clusterName", config.clusterName);
-                    core.setOutput("atlasUrl", config.atlasUrl);
-                    core.setOutput("realmUrl", config.realmUrl);
-                    return;
-                }
-                catch (e) {
-                    core.warning(`An error occurred while deploying cluster '${config.clusterName}': ${e}. Retrying...`);
-                }
+        const config = helpers_1.getConfig();
+        const maxAttempts = 5;
+        for (let i = 0; i < maxAttempts; i++) {
+            try {
+                yield helpers_1.createCluster(config);
+                core.setOutput("clusterName", config.clusterName);
+                core.setOutput("atlasUrl", config.atlasUrl);
+                core.setOutput("realmUrl", config.realmUrl);
+                return;
             }
-            core.setFailed(`Failed to deploy ${config.clusterName} after 5 attempts.`);
+            catch (e) {
+                core.warning(`Attempt #${i}: An error occurred while deploying cluster '${config.clusterName}': ${e}. Retrying...`);
+            }
         }
-        catch (error) {
-            core.setFailed(`An unexpected error occurred: ${error.message}\n${error.stack}`);
-        }
+        core.setFailed(`Failed to deploy ${config.clusterName} after ${maxAttempts} attempts.`);
     });
 }
-run();
+// eslint-disable-next-line github/no-then
+run().catch(e => {
+    core.setFailed(`An unexpected error occurred: ${e.message}\n${e.stack}`);
+});
 exports.default = run;
 
 
@@ -52581,7 +52580,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.deleteApplications = exports.deleteCluster = exports.getClusters = exports.createCluster = exports.getConfig = void 0;
+exports.deleteApps = exports.deleteCluster = exports.getClusters = exports.createCluster = exports.getConfig = void 0;
 const core = __importStar(__webpack_require__(2186));
 const urllib = __importStar(__webpack_require__(4783));
 const crypto_1 = __webpack_require__(6417);
@@ -52664,7 +52663,7 @@ function waitForClusterDeployment(config) {
         throw new Error(`Cluster failed to deploy after ${100 * pollDelay} seconds`);
     });
 }
-function deleteApplications(config, deleteAll = false) {
+function deleteApps(config, deleteAll = false) {
     return __awaiter(this, void 0, void 0, function* () {
         const accessToken = yield authenticate(config);
         const listResponse = yield execRealmRequest("GET", "apps", accessToken, config);
@@ -52685,7 +52684,7 @@ function deleteApplications(config, deleteAll = false) {
         }
     });
 }
-exports.deleteApplications = deleteApplications;
+exports.deleteApps = deleteApps;
 function execRequest(url, method, payload, digestAuth, headers = {}) {
     return __awaiter(this, void 0, void 0, function* () {
         const request = {
