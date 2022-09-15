@@ -1,12 +1,11 @@
 import * as core from "@actions/core";
-import { configureRealmCli, deleteApplications, deleteCluster, getConfig, getClusters } from "./helpers";
+import { deleteApplications, deleteCluster, getConfig, getClusters } from "./helpers";
 
 async function run(): Promise<void> {
     try {
-        const config = getConfig(/* requireDifferentiator */ false);
+        const config = getConfig();
 
         try {
-            await configureRealmCli(config);
             await deleteApplications(config, /* deleteAll */ true);
         } catch (error: any) {
             core.warning(`Failed to delete applications: ${error.message}`);

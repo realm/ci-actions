@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import "mocha";
 import { suite, test, timeout } from "@testdeck/mocha";
-import { deleteCluster, getClusters } from "../src/helpers";
+import { createCluster, deleteCluster, getClusters, deleteApplications } from "../src/helpers";
 import { EnvironmentConfig } from "../src/config";
 
 @suite
@@ -11,17 +11,28 @@ class helpersTests {
         return {
             apiKey: "set-your-api-key",
             privateApiKey: "set-your-api-key",
-            atlasUrl: "https://cloud-qa.mongodb.com",
             projectId: "set-your-project-id",
-            clusterName: "",
+            clusterName: "Cluster1",
+            atlasUrl: "https://cloud-qa.mongodb.com",
             realmUrl: "https://realm-qa.mongodb.com",
-            useExistingCluster: true,
         };
     }
 
     @test.skip
-    exampleTest(): void {
-        expect(true).to.be.true;
+    @timeout(60000)
+    async deploy(): Promise<void> {
+        const config = this.getConfig();
+        await createCluster(config);
+    }
+
+    @test.skip
+    @timeout(60000)
+    async cleanup(): Promise<void> {
+        const config = this.getConfig();
+
+        await deleteApplications(config);
+
+        await deleteCluster(config);
     }
 
     @test.skip
@@ -33,7 +44,14 @@ class helpersTests {
     }
 
     @test.skip
-    @timeout(30000)
+    @timeout(60000)
+    async deleteAllApps(): Promise<void> {
+        const config = this.getConfig();
+        await deleteApplications(config, true);
+    }
+
+    @test.skip
+    @timeout(60000)
     async deleteAllClusters(): Promise<void> {
         const config = this.getConfig();
         const result = await getClusters(config);
