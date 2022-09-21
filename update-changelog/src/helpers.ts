@@ -116,7 +116,7 @@ export async function updateChangelogContent(
 }
 
 function hasActualChanges(content: string): boolean {
-    return content.includes("*") && !content.includes("* None\n");
+    return content.includes("*") && !(content.includes("* None\n") || content.includes("* None.\n"));
 }
 
 function getNextVersion(prevVersion: string, sectionName: string): string | null {

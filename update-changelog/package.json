@@ -1,6 +1,6 @@
 {
   "name": "update-changelog",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Update the changelog and infer the correct version",
   "main": "lib/src/main.js",
   "scripts": {
@@ -24,31 +24,31 @@
   "author": "realm",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.2.6",
+    "@actions/core": "^1.9.1",
     "fs": "0.0.1-security",
-    "moment": "^2.29.1",
-    "semver": "^7.3.5"
+    "moment": "^2.29.4",
+    "semver": "^7.3.7"
   },
   "devDependencies": {
-    "@testdeck/mocha": "^0.1.2",
-    "@types/chai": "^4.2.15",
-    "@types/mocha": "^8.2.1",
-    "@types/node": "^14.14.9",
-    "@types/semver": "^7.3.7",
-    "@types/sinon": "^9.0.11",
-    "@types/tmp": "^0.2.1",
-    "@typescript-eslint/parser": "^4.8.1",
-    "@vercel/ncc": "^0.25.1",
-    "chai": "^4.3.3",
-    "eslint": "^7.17.0",
-    "eslint-plugin-github": "^4.1.1",
-    "eslint-plugin-jest": "^24.1.3",
-    "js-yaml": "^3.14.0",
-    "mocha": "^8.3.1",
-    "prettier": "2.2.1",
-    "sinon": "^9.2.4",
+    "@testdeck/mocha": "^0.2.0",
+    "@types/chai": "^4.3.3",
+    "@types/mocha": "^9.1.1",
+    "@types/node": "^18.7.5",
+    "@types/semver": "^7.3.12",
+    "@types/sinon": "^10.0.13",
+    "@types/tmp": "^0.2.3",
+    "@typescript-eslint/parser": "^5.33.1",
+    "@vercel/ncc": "^0.34.0",
+    "chai": "^4.3.6",
+    "eslint": "^8.22.0",
+    "eslint-plugin-github": "^4.3.7",
+    "eslint-plugin-jest": "^26.8.3",
+    "js-yaml": "^4.1.0",
+    "mocha": "^10.0.0",
+    "prettier": "2.7.1",
+    "sinon": "^14.0.0",
     "tmp": "^0.2.1",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.1.3"
+    "ts-node": "^10.9.1",
+    "typescript": "^4.7.4"
   }
 }
