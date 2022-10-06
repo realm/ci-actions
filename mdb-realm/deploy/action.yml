@@ -1,0 +1,32 @@
+name: deploy
+description: Deploys an Atlas cluster if one doesn't exist already
+author: Realm
+inputs:
+  atlasUrl:
+    required: false
+    description: The Atlas url - e.g. https://cloud-qa.mongodb.com.
+  realmUrl:
+    required: false
+    description: The MongoDB Realm url - e.g. https://realm-qa.mongodb.com.
+  projectId:
+    required: true
+    description: The Atlas project Id.
+  apiKey:
+    required: true
+    description: The public API key.
+  privateapiKey:
+    required: true
+    description: The private API key.
+  clusterName:
+    required: false
+    description: Provide a specific name of cluster that to be created.
+outputs:
+  clusterName:
+    description: The name of the created cluster
+  atlasUrl:
+    description: The Atlas Url where the cluster was deployed
+  realmUrl:
+    description: The Realm Url where the cluster was deployed
+runs:
+  using: node16
+  main: ../dist/deploy/index.js
