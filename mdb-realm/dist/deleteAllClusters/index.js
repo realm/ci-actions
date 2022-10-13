@@ -52601,8 +52601,8 @@ function getConfig() {
         projectId: core.getInput("projectId", { required: true }),
         apiKey: core.getInput("apiKey", { required: true }),
         privateApiKey: core.getInput("privateApiKey", { required: true }),
-        realmUrl: core.getInput("realmUrl", { required: false }) || "https://realm-dev.mongodb.com",
-        atlasUrl: core.getInput("atlasUrl", { required: false }) || "https://cloud-dev.mongodb.com",
+        realmUrl: core.getInput("realmUrl", { required: false }) || "https://realm-qa.mongodb.com",
+        atlasUrl: core.getInput("atlasUrl", { required: false }) || "https://cloud-qa.mongodb.com",
         clusterName: core.getInput("clusterName", { required: false }) || generateClusterName(),
     };
 }
