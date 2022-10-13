@@ -4,10 +4,10 @@ author: Realm
 inputs:
   atlasUrl:
     required: false
-    description: The Atlas url - e.g. https://cloud-dev.mongodb.com.
+    description: The Atlas url - e.g. https://cloud-qa.mongodb.com.
   realmUrl:
     required: false
-    description: The MongoDB Realm url - e.g. https://realm-dev.mongodb.com.
+    description: The MongoDB Realm url - e.g. https://realm-qa.mongodb.com.
   projectId:
     required: true
     description: The Atlas project Id.
