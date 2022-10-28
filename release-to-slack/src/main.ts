@@ -22,7 +22,7 @@ async function run(): Promise<void> {
 
         const client = new http.HttpClient();
         await client.postJson(webhookUrl, result);
-    } catch (error) {
+    } catch (error: any) {
         core.setFailed(`${error.message}: ${error.stack}`);
     }
 }
