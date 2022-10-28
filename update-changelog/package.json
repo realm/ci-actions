@@ -24,7 +24,7 @@
   "author": "realm",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.9.1",
+    "@actions/core": "^1.10.0",
     "fs": "0.0.1-security",
     "moment": "^2.29.4",
     "semver": "^7.3.7"
