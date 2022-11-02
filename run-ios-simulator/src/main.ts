@@ -36,7 +36,7 @@ async function run(): Promise<void> {
         await execCmd(`xcrun simctl boot ${id}`);
         await execCmd(`xcrun simctl install ${id} ${appPath}`);
         await execCmd(`xcrun simctl launch --console-pty ${id} ${bundleId} ${args}`);
-    } catch (error) {
+    } catch (error: any) {
         core.setFailed(`An unexpected error occurred: ${error.message}\n${error.stack}`);
     }
 }

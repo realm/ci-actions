@@ -12,7 +12,7 @@ async function run(): Promise<void> {
             core.setOutput("realmUrl", config.realmUrl);
 
             return;
-        } catch (e) {
+        } catch (e: any) {
             core.warning(
                 `Attempt #${i}: An error occurred while deploying cluster '${config.clusterName}': ${e}. Retrying...`,
             );

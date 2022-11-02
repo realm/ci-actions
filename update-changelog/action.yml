@@ -18,5 +18,5 @@ outputs:
   new-version:
     description: The new version as inferred from the changelog
 runs:
-  using: node12
+  using: node16
   main: dist/index.js
