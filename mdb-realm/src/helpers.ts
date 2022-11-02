@@ -21,6 +21,7 @@ export function getConfig(): EnvironmentConfig {
         realmUrl: core.getInput("realmUrl", { required: false }) || "https://realm-qa.mongodb.com",
         atlasUrl: core.getInput("atlasUrl", { required: false }) || "https://cloud-qa.mongodb.com",
         clusterName: core.getInput("clusterName", { required: false }) || generateClusterName(),
+        clusterSize: core.getInput("clusterSize", { required: false }) || "M5",
     };
 }
 
@@ -31,17 +32,28 @@ export async function createCluster(config: EnvironmentConfig): Promise<void> {
         return;
     }
 
-    const payload = {
-        name: config.clusterName,
-        providerSettings: {
-            instanceSizeName: "M5",
+    let providerSettings;
+    if (Number(config.clusterSize.substring(1)) < 10) {
+        providerSettings = {
+            instanceSizeName: config.clusterSize,
             providerName: "TENANT",
             regionName: "US_EAST_1",
             backingProviderName: "AWS",
-        },
+        };
+    } else {
+        providerSettings = {
+            instanceSizeName: config.clusterSize,
+            providerName: "AWS",
+            regionName: "US_EAST_1",
+        };
+    }
+
+    const payload = {
+        name: config.clusterName,
+        providerSettings,
     };
 
-    core.info(`Creating Atlas cluster: ${config.clusterName}`);
+    core.info(`Creating ${config.clusterSize} cluster: ${config.clusterName}`);
 
     const response = await execAtlasRequest("POST", "clusters", config, payload);
 

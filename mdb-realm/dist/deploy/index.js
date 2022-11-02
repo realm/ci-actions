@@ -63477,6 +63477,7 @@ function getConfig() {
         realmUrl: core.getInput("realmUrl", { required: false }) || "https://realm-qa.mongodb.com",
         atlasUrl: core.getInput("atlasUrl", { required: false }) || "https://cloud-qa.mongodb.com",
         clusterName: core.getInput("clusterName", { required: false }) || generateClusterName(),
+        clusterSize: core.getInput("clusterSize", { required: false }) || "M5",
     };
 }
 exports.getConfig = getConfig;
@@ -63487,16 +63488,27 @@ function createCluster(config) {
             core.info(`Skipping creation of cluster '${config.clusterName}' because it already exists`);
             return;
         }
-        const payload = {
-            name: config.clusterName,
-            providerSettings: {
-                instanceSizeName: "M5",
+        let providerSettings;
+        if (Number(config.clusterSize.substring(1)) < 10) {
+            providerSettings = {
+                instanceSizeName: config.clusterSize,
                 providerName: "TENANT",
                 regionName: "US_EAST_1",
                 backingProviderName: "AWS",
-            },
+            };
+        }
+        else {
+            providerSettings = {
+                instanceSizeName: config.clusterSize,
+                providerName: "AWS",
+                regionName: "US_EAST_1",
+            };
+        }
+        const payload = {
+            name: config.clusterName,
+            providerSettings,
         };
-        core.info(`Creating Atlas cluster: ${config.clusterName}`);
+        core.info(`Creating ${config.clusterSize} cluster: ${config.clusterName}`);
         const response = yield execAtlasRequest("POST", "clusters", config, payload);
         core.info(`Cluster created: ${JSON.stringify(response)}`);
         yield waitForClusterDeployment(config);
