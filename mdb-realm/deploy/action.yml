@@ -1,5 +1,5 @@
-name: deleteAllClusters
-description: Deletes all apps and clusters in a project
+name: deploy
+description: Deploys an Atlas cluster if one doesn't exist already
 author: Realm
 inputs:
   atlasUrl:
@@ -17,6 +17,16 @@ inputs:
   privateapiKey:
     required: true
     description: The private API key.
+  clusterName:
+    required: false
+    description: Provide a specific name of cluster that to be created.
+outputs:
+  clusterName:
+    description: The name of the created cluster
+  atlasUrl:
+    description: The Atlas Url where the cluster was deployed
+  realmUrl:
+    description: The Realm Url where the cluster was deployed
 runs:
   using: node16
-  main: ../dist/deleteAllClusters/index.js
+  main: ../dist/deploy/index.js

@@ -15,5 +15,5 @@ inputs:
     required: true
     description: the version that is being released
 runs:
-  using: node12
+  using: node16
   main: dist/index.js

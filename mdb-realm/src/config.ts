@@ -5,5 +5,4 @@ export interface EnvironmentConfig {
     atlasUrl: string;
     realmUrl: string;
     clusterName: string;
-    useExistingCluster: boolean;
 }

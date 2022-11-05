@@ -9,10 +9,17 @@ async function run(): Promise<void> {
             throw new Error(`File ${changelogPath} doesn't exist.`);
         }
 
-        const versionSuffix = core.getInput("version-suffix", { required: false });
-        core.info(`Creating a new version with suffix ${versionSuffix}`);
+        const versionOverride = core.getInput("version", { required: false });
+        if (versionOverride) {
+            core.info(`Creating a new version '${versionOverride}' (overridden)`);
+        }
 
-        const result = await updateChangelogContent(changelogPath, versionSuffix);
+        const versionSuffix = core.getInput("version-suffix", { required: false });
+        if (versionSuffix) {
+            core.info(`Creating a new version with suffix '${versionSuffix}'`);
+        }
+
+        const result = await updateChangelogContent(changelogPath, versionSuffix, versionOverride);
         core.setOutput("new-version", result.newVersion);
         core.info(`Inferred version: ${result.newVersion}`);
 

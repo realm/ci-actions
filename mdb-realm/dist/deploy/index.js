@@ -63350,7 +63350,7 @@ XRegExp = XRegExp || (function (undef) {
 
 /***/ }),
 
-/***/ 3142:
+/***/ 5930:
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 "use strict";
@@ -63392,30 +63392,27 @@ const core = __importStar(__webpack_require__(2186));
 const helpers_1 = __webpack_require__(3015);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const config = (0, helpers_1.getConfig)();
+        const config = (0, helpers_1.getConfig)();
+        const maxAttempts = 5;
+        for (let i = 0; i < maxAttempts; i++) {
             try {
-                yield (0, helpers_1.deleteApps)(config, /* deleteAll */ true);
+                yield (0, helpers_1.createCluster)(config);
+                core.setOutput("clusterName", config.clusterName);
+                core.setOutput("atlasUrl", config.atlasUrl);
+                core.setOutput("realmUrl", config.realmUrl);
+                return;
             }
-            catch (error) {
-                core.warning(`Failed to delete applications: ${error.message}`);
-            }
-            const clusters = yield (0, helpers_1.getClusters)(config);
-            for (const cluster of clusters) {
-                try {
-                    yield (0, helpers_1.deleteCluster)(config, cluster);
-                }
-                catch (error) {
-                    core.warning(`Failed to delete cluster ${cluster}: ${error.message}\n${error.stack}`);
-                }
+            catch (e) {
+                core.warning(`Attempt #${i}: An error occurred while deploying cluster '${config.clusterName}': ${e}. Retrying...`);
             }
         }
-        catch (error) {
-            core.setFailed(`An unexpected error occurred: ${error.message}\n${error.stack}`);
-        }
+        core.setFailed(`Failed to deploy ${config.clusterName} after ${maxAttempts} attempts.`);
     });
 }
-run();
+// eslint-disable-next-line github/no-then
+run().catch(e => {
+    core.setFailed(`An unexpected error occurred: ${e.message}\n${e.stack}`);
+});
 exports.default = run;
 
 
@@ -64002,7 +63999,7 @@ module.exports = require("zlib");;
 /******/ 	// module exports must be returned from runtime so entry inlining is disabled
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(3142);
+/******/ 	return __webpack_require__(5930);
 /******/ })()
 ;
 //# sourceMappingURL=index.js.map
