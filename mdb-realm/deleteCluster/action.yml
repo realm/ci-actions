@@ -19,7 +19,7 @@ inputs:
     description: The private API key.
   clusterName:
     required: false
-    description: Provide a specific name of cluster that to be deleted."
+    description: Provide a specific name of cluster that to be deleted.
 runs:
   using: node16
   main: ../dist/deleteCluster/index.js
