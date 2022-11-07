@@ -1,4 +1,4 @@
-name: deleteAllClusters
+name: cleanup
 description: Deletes all BaaS apps and Atlas clusters in a project
 author: Realm
 inputs:
@@ -17,6 +17,9 @@ inputs:
   privateapiKey:
     required: true
     description: The private API key.
+  clusterName:
+    required: false
+    description: Provide a specific name of cluster that to be deleted.
 runs:
   using: node16
   main: ../dist/cleanup/index.js
