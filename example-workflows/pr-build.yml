@@ -29,7 +29,7 @@ jobs:
   # build-native will build the native binaries for all platforms the SDK supports
   # They are built as a matrix to optimize parallelization - each architecture is
   # built separately. Some SDKs can consume individual binaries, while others require
-  # them to be stitched together. See https://github.com/realm/realm-dart/blob/master/.github/workflows/binary-combine-ios.yml
+  # them to be stitched together. See https://github.com/realm/realm-dart/blob/main/.github/workflows/binary-combine-ios.yml
   # for an example of building an xcframework from the individual frameworks.
   build-native:
     name: Build Native Binaries
