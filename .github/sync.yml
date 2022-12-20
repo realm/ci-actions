@@ -2,9 +2,26 @@
 # about format of this file that specifies which files that will be synced
 # to which repos when PRs are merged to main.
 
+# Potentially later add to group/repos:
+# realm/realm-cpp
+# realm-react-context
+# realm-dart-samples
+# realm-kotlin-samples
+# realm-dotnet-samples
+# realm-flipper-plugin
+
 group:
   repos: |
+    realm/realm-js
+    realm/realm-java
+    realm/realm-dotnet
+    realm/realm-swift
+    realm/realm-dart
+    realm/realm-kotlin
+    realm/realm-core
+    realm/realm-studio
     realm/test
+        
   files:
     - source: synced-files/LICENSE
       dest: LICENSE
