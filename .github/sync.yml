@@ -8,8 +8,8 @@ group:
   files:
     - source: synced-files/LICENSE
       dest: LICENSE
-    - source: synced-files/.github/workflows/issue-needs-attention.yml
-      dest: .github/workflows/issue-needs-attention.yml
+    - source: synced-files/.github/workflows/Issue-Needs-Attention.yml
+      dest: .github/workflows/Issue-Needs-Attention.yml
     - source: synced-files/.github/no-response.yml
       dest: .github/no-response.yml
     - source: synced-files/.github/ISSUE_TEMPLATE/feature.yml
