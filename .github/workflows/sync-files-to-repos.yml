@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - main
-      - test-sync-files
   workflow_dispatch:
 jobs:
   sync:
@@ -17,4 +16,7 @@ jobs:
       - name: Run GitHub File Sync
         uses: BetaHuhn/repo-file-sync-action@v1
         with:
-          GH_PAT: ${{ secrets.REALM_CI_PAT }}
+          GH_PAT: ${{ secrets.REALM_CI_REPO_SYNC }}
+          PR_LABELS: false
+          DRY_RUN: false
+  
