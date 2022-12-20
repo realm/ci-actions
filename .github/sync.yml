@@ -1,0 +1,10 @@
+# See https://github.com/marketplace/actions/repo-file-sync-action for info
+# about format of this file that specifies which files that will be synced
+# to which repos when PRs are merged to main.
+
+group:
+  repos: |
+    realm/test
+  files:
+    - source: synced-files/LICENSE
+      dest: LICENSE
