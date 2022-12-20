@@ -18,4 +18,4 @@ jobs:
         uses: BetaHuhn/repo-file-sync-action@v1
         with:
           DRY_RUN: true
-          GH_PAT: ${{ secrets.REALM_CI_PAT }}
+          GH_PAT: ${{ secrets.REALM_REPO_PAT }}
