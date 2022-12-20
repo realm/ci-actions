@@ -18,5 +18,6 @@ jobs:
         uses: BetaHuhn/repo-file-sync-action@v1
         with:
           GH_PAT: ${{ secrets.REALM_CI_REPO_SYNC }}
+          PR_LABELS: false
           DRY_RUN: false
   
