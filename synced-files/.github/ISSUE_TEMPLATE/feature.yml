@@ -45,7 +45,7 @@ body:
       label: Feature would mainly be used with
       options:
         - -- select --
-        - Local database only
+        - Local Database only
         - Atlas Device Sync
         - 'Atlas App Services: Auth or Functions etc'
     validations:
