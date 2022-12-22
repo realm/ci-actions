@@ -2,7 +2,7 @@
 # about format of this file that specifies which files that will be synced
 # to which repos when PRs are merged to main.
 
-# Potentially later add to group/repos:
+# Potentially add later:
 # realm/realm-cpp
 # realm-react-context
 # realm-dart-samples
@@ -11,23 +11,35 @@
 # realm-flipper-plugin
 
 group:
-  repos: |
-    realm/realm-js
-    realm/realm-java
-    realm/realm-dotnet
-    realm/realm-swift
-    realm/realm-dart
-    realm/realm-kotlin
-    realm/realm-core
-    realm/realm-studio
-    realm/test
-        
-  files:
-    - source: synced-files/LICENSE
-      dest: LICENSE
-    - source: synced-files/.github/workflows/Issue-Needs-Attention.yml
-      dest: .github/workflows/Issue-Needs-Attention.yml
-    - source: synced-files/.github/no-response.yml
-      dest: .github/no-response.yml
-    - source: synced-files/.github/ISSUE_TEMPLATE/feature.yml
-      dest: .github/ISSUE_TEMPLATE/feature.yml
+  - files:
+      - source: synced-files/LICENSE
+        dest: LICENSE
+      - source: synced-files/.github/workflows/Issue-Needs-Attention.yml
+        dest: .github/workflows/Issue-Needs-Attention.yml
+      - source: synced-files/.github/no-response.yml
+        dest: .github/no-response.yml
+    repos: |
+      realm/realm-js
+      realm/realm-java
+      realm/realm-dotnet
+      realm/realm-swift
+      realm/realm-dart
+      realm/realm-kotlin
+      realm/realm-core
+      realm/realm-studio
+      realm/test
+      
+  - files:
+      - source: synced-files/.github/ISSUE_TEMPLATE/feature.yml
+        dest: .github/ISSUE_TEMPLATE/feature.yml
+    repos: |
+      realm/realm-js
+      realm/realm-java
+      realm/realm-dotnet
+      realm/realm-swift
+      # Don't use issue forms yet
+      # realm/realm-dart
+      # realm/realm-kotlin
+      # realm/realm-core
+      # realm/realm-studio
+      realm/test
