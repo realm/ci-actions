@@ -35,7 +35,7 @@ body:
         - -- select --
         - Dealbreaker
         - Would be a major improvement
-        - I'd like to see it but have a workaround
+        - I would like to have it but have a workaround
         - Fairly niche but nice to have anyway
     validations:
       required: true
