@@ -19,4 +19,5 @@ jobs:
           GH_PAT: ${{ secrets.REALM_CI_REPO_SYNC }}
           PR_LABELS: false
           DRY_RUN: false
+          GIT_EMAIL: robot@realm.io
   
