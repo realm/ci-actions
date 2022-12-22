@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - main
-      - test-sync-files
   workflow_dispatch:
 jobs:
   sync:
@@ -20,5 +19,6 @@ jobs:
           GH_PAT: ${{ secrets.REALM_CI_REPO_SYNC }}
           PR_LABELS: false
           DRY_RUN: false
+          GIT_USERNAME: realm-ci
           GIT_EMAIL: robot@realm.io
   
