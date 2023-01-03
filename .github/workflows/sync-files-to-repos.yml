@@ -1,0 +1,24 @@
+# Sync common files to other repos.
+# Adjust which files are synced in the .github/sync.yml file.
+
+name: Sync Files to repos
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Run GitHub File Sync
+        uses: BetaHuhn/repo-file-sync-action@475a6502288f55cc52e951bdd1c44d7981218478  # 1.19.0
+        with:
+          GH_PAT: ${{ secrets.REALM_CI_REPO_SYNC }}
+          PR_LABELS: false
+          DRY_RUN: false
+          GIT_USERNAME: realm-ci
+          GIT_EMAIL: robot@realm.io
+  
