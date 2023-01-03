@@ -18,6 +18,12 @@ group:
         dest: .github/workflows/Issue-Needs-Attention.yml
       - source: synced-files/.github/no-response.yml
         dest: .github/no-response.yml
+      - source: synced-files/.github/workflows/auto-assign.yml
+        dest: .github/workflows/auto-assign.yml
+      - source: synced-files/.github/auto-assign.yml
+        dest: .github/auto-assign.yml
+      - source: synced-files/.github/workflows/check-changelog.yml
+        dest: .github/workflows/check-changelog.yml
     repos: |
       realm/realm-js
       realm/realm-java
