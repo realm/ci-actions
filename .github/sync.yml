@@ -16,8 +16,8 @@ group:
         dest: LICENSE
       - source: synced-files/.github/workflows/Issue-Needs-Attention.yml
         dest: .github/workflows/Issue-Needs-Attention.yml
-      - source: synced-files/.github/no-response.yml
-        dest: .github/no-response.yml
+      - source: synced-files/.github/workflows/no-response.yml
+        dest: .github/workflows/no-response.yml
       - source: synced-files/.github/workflows/auto-assign.yml
         dest: .github/workflows/auto-assign.yml
       - source: synced-files/.github/auto-assign.yml
@@ -34,7 +34,7 @@ group:
       realm/realm-core
       realm/realm-studio
       realm/test
-      
+
   - files:
       - source: synced-files/.github/ISSUE_TEMPLATE/feature.yml
         dest: .github/ISSUE_TEMPLATE/feature.yml
