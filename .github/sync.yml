@@ -20,8 +20,8 @@ group:
         dest: .github/workflows/no-response.yml
       - source: synced-files/.github/workflows/auto-assign.yml
         dest: .github/workflows/auto-assign.yml
-      - source: synced-files/.github/auto-assign.yml
-        dest: .github/auto-assign.yml
+      - source: synced-files/.github/auto_assign.yml
+        dest: .github/auto_assign.yml
       - source: synced-files/.github/workflows/check-changelog.yml
         dest: .github/workflows/check-changelog.yml
     repos: |
@@ -44,8 +44,8 @@ group:
       realm/realm-dotnet
       realm/realm-swift
       realm/realm-dart
-      # Don't use issue forms yet
-      # realm/realm-kotlin
-      # realm/realm-core
-      # realm/realm-studio
-      realm/test
+ 
+# Don't use issue forms yet
+# realm/realm-kotlin
+# realm/realm-core
+# realm/realm-studio
