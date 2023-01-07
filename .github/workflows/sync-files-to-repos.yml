@@ -17,7 +17,7 @@ jobs:
         uses: BetaHuhn/repo-file-sync-action@475a6502288f55cc52e951bdd1c44d7981218478 
         with:
           GH_PAT: ${{ secrets.REALM_CI_REPO_SYNC }}
-          PR_LABELS: false
+          PR_LABELS: no-changelog
           DRY_RUN: false
           GIT_USERNAME: realm-ci
           GIT_EMAIL: robot@realm.io
