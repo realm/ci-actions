@@ -26,27 +26,10 @@ group:
       - source: synced-files/.github/workflows/check-changelog.yml
         dest: .github/workflows/check-changelog.yml
     repos: |
-      # realm/realm-js
-      # realm/realm-java
-      # realm/realm-dotnet
-      # realm/realm-swift
-      # realm/realm-dart
-      # realm/realm-kotlin
-      # realm/realm-core
-      # realm/realm-studio
       realm/test
 
   - files:
       - source: synced-files/.github/ISSUE_TEMPLATE/feature.yml
         dest: .github/ISSUE_TEMPLATE/feature.yml
     repos: |
-      # realm/realm-js
-      # realm/realm-java
-      # realm/realm-dotnet
-      # realm/realm-swift
-      # realm/realm-dart
-      # Don't use issue forms yet
-      # realm/realm-kotlin
-      # realm/realm-core
-      # realm/realm-studio
       realm/test
