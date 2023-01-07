@@ -15,7 +15,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
       - name: Run GitHub File Sync
-        uses: BetaHuhn/repo-file-sync-action@v1.19.0 # 475a6502288f55cc52e951bdd1c44d7981218478 
+        uses: bmunkholm/repo-file-sync-action@master # v1.19.0 475a6502288f55cc52e951bdd1c44d7981218478 
         with:
           GH_PAT: ${{ secrets.REALM_CI_REPO_SYNC }}
           PR_LABELS: false
