@@ -24,6 +24,10 @@ group:
         dest: .github/auto_assign.yml
       - source: synced-files/.github/workflows/check-changelog.yml
         dest: .github/workflows/check-changelog.yml
+      - source: synced-files/.github/advanced-issue-labeler.yml
+        dest: .github/advanced-issue-labeler.yml
+      - source: synced-files/.github/workflows/issue-labeler.yml
+        dest: .github/workflows/issue-labeler.yml
     repos: |
       realm/realm-js
       realm/realm-java
