@@ -3,6 +3,9 @@
 
 # syntax - https://github.com/redhat-plumbers-in-action/advanced-issue-labeler#policy
 # Below keys map from the option used in issue form dropdowns to issue labels
+# Limitation:
+# Currently it's not possible to use strings containing ,␣ in the dropdown menus in the issue forms. 
+
 ---
 
 policy:
