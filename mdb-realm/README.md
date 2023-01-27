@@ -21,6 +21,8 @@ deploy-cluster:
     - uses: realm/ci-actions/mdb-realm/deploy@v4
       id: deploy-cluster
       with:
+        realmUrl: ${{ secrets.REALM_BASE_URL }}
+        atlasUrl: ${{ secrets.ATLAS_BASE_URL }}
         projectId: ${{ secrets.ATLAS_PROJECT_ID }}
         apiKey: ${{ secrets.ATLAS_PUBLIC_API_KEY }}
         privateApiKey: ${{ secrets.ATLAS_PRIVATE_API_KEY }}
@@ -39,7 +41,8 @@ cleanup-baas-my-test-target:
   runs-on: ubuntu-latest
     name: Cleanup MyTestTarget
     needs:
-    - run-my-test-target
+      - run-my-test-target
+      - deploy-cluster
     if: always()
     steps:
     - uses: actions/checkout@v2
@@ -48,7 +51,7 @@ cleanup-baas-my-test-target:
         projectId: ${{ secrets.ATLAS_PROJECT_ID }}
         apiKey: ${{ secrets.ATLAS_PUBLIC_API_KEY }}
         privateApiKey: ${{ secrets.ATLAS_PRIVATE_API_KEY }}
-
+        clusterName: ${{ needs.deploy-cluster.outputs.clusterName }}
 ```
 
 The action takes the following parameters:
@@ -66,7 +69,7 @@ The action has the following outputs:
 1. `atlasUrl`: the Atlas Url where the cluster was created (same as the `atlasUrl` input).
 1. `realmUrl`: the Realm Url where the cluster was created (same as the `realmUrl` input).
 
-## deleteAllClusters
+## cleanup
 
 Deletes all apps and clusters from a project. Use this only as a manual cleanup action as it may mess up existing jobs that are using the clusters.
 
@@ -82,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
       name: Wipe all clusters and apps
       steps:
-      - uses: realm/ci-actions/mdb-realm/deleteAllClusters@v5
+      - uses: realm/ci-actions/mdb-realm/cleanup@v4
         with:
           projectId: ${{ secrets.ATLAS_PROJECT_ID }}
           apiKey: ${{ secrets.ATLAS_PUBLIC_API_KEY }}
@@ -96,3 +99,4 @@ The action takes the following parameters:
 1. *(Required)* `privateApiKey`: the private [Atlas API key](https://docs.atlas.mongodb.com/configure-api-access/).
 1. *(Optional)* `atlasUrl`: the Atlas URL to deploy against. Default is https://cloud-qa.mongodb.com.
 1. *(Optional)* `realmUrl`: the MongoDB Realm URL to deploy against. Default is https://realm-qa.mongodb.com.
+1. *(Optional)* `clusterName`: the name of the cluster to be deleted.  If not provided, all clusters in the project will be removed.

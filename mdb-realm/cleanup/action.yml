@@ -3,10 +3,10 @@ description: Deletes all BaaS apps and Atlas clusters in a project
 author: Realm
 inputs:
   atlasUrl:
-    required: true
+    required: false
     description: The Atlas url - e.g. https://cloud-qa.mongodb.com.
   realmUrl:
-    required: true
+    required: false
     description: The MongoDB Realm url - e.g. https://realm-qa.mongodb.com.
   projectId:
     required: true
@@ -19,7 +19,7 @@ inputs:
     description: The private API key.
   clusterName:
     required: false
-    description: Provide a specific name of cluster that to be deleted.
+    description: Provide a specific name of cluster that to be deleted.  If not provided, all clusters in the project will be deleted.
 runs:
   using: node16
   main: ../dist/cleanup/index.js
