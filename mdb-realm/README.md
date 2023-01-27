@@ -4,7 +4,11 @@ This action exposes an API to obtain an Atlas cluster. It will create the cluste
 
 ## deploy
 
-The action will deploy an M5 Atlas cluster. If `clusterName` is specified, the cluster will use that name, otherwise a hashed 8-character name will be generated from the run id and the attempt id.
+The action will deploy an M5 Atlas cluster. If `clusterName` is specified, the cluster will use that name, otherwise a hashed 8-character name will be generated based on the `github.run_id` and `github.run_attempt`.
+
+## cleanup
+
+This action is meant to be used in conjunction with the `deploy` action.  It can be used to destroy a cluster and any associated apps.  The `clusterName` can be used to specify which cluster will be deleted, otherwise it will use the same strategy as deploy to generate a cluster name based on the `github.run_id` and `github.run_attempt`.
 
 ## Usage
 
@@ -51,16 +55,16 @@ cleanup-baas-my-test-target:
 
 ```
 
-The action takes the following parameters:
+Both actions take the following parameters:
 
 1. *(Required)* `projectId`: the Id of the Atlas project where the cluster will be created.
 1. *(Required)* `apiKey`: the public [Atlas API key](https://docs.atlas.mongodb.com/configure-api-access/).
 1. *(Required)* `privateApiKey`: the private [Atlas API key](https://docs.atlas.mongodb.com/configure-api-access/).
 1. *(Optional)* `atlasUrl`: the Atlas URL to deploy against. Default is https://cloud-qa.mongodb.com.
 1. *(Optional)* `realmUrl`: the MongoDB Realm URL to deploy against. Default is https://realm-qa.mongodb.com.
-1. *(Optional)* `clusterName`: the name of the cluster that to be created. If it is not set it is auto-generated.
+1. *(Optional)* `clusterName`: the name of the cluster that to be created. If it is not set it is auto-generated. The generated name is based on the `github.run_id` and `github.run_attempt`.
 
-The action has the following outputs:
+The `deploy` action has the following outputs:
 
 1. `clusterName`: the name of the Atlas cluster created.
 1. `atlasUrl`: the Atlas Url where the cluster was created (same as the `atlasUrl` input).
