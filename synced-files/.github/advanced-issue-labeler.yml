@@ -34,7 +34,7 @@ policy:
         label:
           - name: 'SDK-Use:Local'
             keys: ['Local Database only']
-          - name: 'SDK-Use:Sync' 
+          - name: 'SDK-Use:Sync'
             keys: ['Atlas Device Sync']
           - name: 'SDK-Use:Services'
             keys: ['Atlas App Services: Function or GraphQL or DataAPI etc']
@@ -48,7 +48,7 @@ policy:
             keys: ['Yes']
           - name: 'Encryption:Off'
             keys: ['No']
-            
+
       - id: [app-type]
         block-list: []
         label:
@@ -62,7 +62,7 @@ policy:
             keys: ['Console or Server']
           - name: 'App-type:Other'
             keys: ['Other']
-           
+
       - id: [importance]
         block-list: []
         label:
@@ -73,4 +73,4 @@ policy:
           - name: 'Importance:Workaround'
             keys: ['I would like to have it but have a workaround']
           - name: 'Importance:Nice'
-            keys: ['Fairly niche but nice to have anyway']  
+            keys: ['Fairly niche but nice to have anyway']
