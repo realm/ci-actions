@@ -66,6 +66,7 @@ Both actions take the following parameters:
 1. *(Optional)* `atlasUrl`: the Atlas URL to deploy against. Default is https://cloud-qa.mongodb.com.
 1. *(Optional)* `realmUrl`: the MongoDB Realm URL to deploy against. Default is https://realm-qa.mongodb.com.
 1. *(Optional)* `clusterName`: the name of the cluster that to be created. If it is not set it is auto-generated. The generated name is based on the `github.run_id` and `github.run_attempt`.
+1. *(Optional)* `clusterSize`: the size of the cluster to be created. Default is M5.
 
 The `deploy` action has the following outputs:
 

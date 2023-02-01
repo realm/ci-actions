@@ -20,6 +20,9 @@ inputs:
   clusterName:
     required: false
     description: Provide a specific name of cluster that to be deleted. If not provided, one will be generated based on the `github.run_id` and `github.run_attempt`.
+  clusterSize:
+    required: false
+    description: Provide a specific size of the cluster to be created. Default is M5.
 outputs:
   clusterName:
     description: The name of the created cluster

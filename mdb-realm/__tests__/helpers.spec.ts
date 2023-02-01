@@ -15,6 +15,7 @@ class helpersTests {
             clusterName: "Cluster1",
             atlasUrl: "https://cloud-qa.mongodb.com",
             realmUrl: "https://realm-qa.mongodb.com",
+            clusterSize: "M5",
         };
     }
 
