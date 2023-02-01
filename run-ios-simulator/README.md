@@ -19,5 +19,6 @@ The action takes the following parameters:
 2. *(Required)* `bundleId`: the app bundle id of your app
 3. *(Optional)* `iphoneToSimulate`: the ios devices that you want to simulated. If none is passed it defaults to *"iPhone-8"*
 4. *(Optional)* `arguments`: additional arguments to supply to the simulator
+5. *(Optional)* `os`: operating system to simulate. Valid options are `iOS` and `tvOS`.
 
 [![GitHub release badge](https://badgen.net/github/release/realm/ci-actions/run-ios-simulator)](https://github.com/realm/ci-actions/releases/latest)

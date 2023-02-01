@@ -15,6 +15,10 @@ inputs:
     description: Arguments for the simulator
     required: false
     default: ""
+  os:
+    description: Operating System to simulate. Valid options are 'iOS' and 'tvOS'
+    required: false
+    default: iOS
 
 runs:
   using: node16
