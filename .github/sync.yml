@@ -1,0 +1,69 @@
+# See https://github.com/marketplace/actions/repo-file-sync-action for info
+# about format of this file that specifies which files that will be synced
+# to which repos when PRs are merged to main.
+
+# Potentially add later:
+# realm/realm-cpp
+# realm-react-context
+# realm-dart-samples
+# realm-kotlin-samples
+# realm-dotnet-samples
+# realm-flipper-plugin
+
+group:
+  - files:
+      - source: synced-files/LICENSE
+        dest: LICENSE
+      - source: synced-files/.github/workflows/Issue-Needs-Attention.yml
+        dest: .github/workflows/Issue-Needs-Attention.yml
+      - source: synced-files/.github/workflows/no-response.yml
+        dest: .github/workflows/no-response.yml
+      - source: synced-files/.github/workflows/auto-assign.yml
+        dest: .github/workflows/auto-assign.yml
+      - source: synced-files/.github/auto_assign.yml
+        dest: .github/auto_assign.yml
+      - source: synced-files/.github/advanced-issue-labeler.yml
+        dest: .github/advanced-issue-labeler.yml
+      - source: synced-files/.github/workflows/issue-labeler.yml
+        dest: .github/workflows/issue-labeler.yml
+    repos: |
+      realm/realm-js
+      realm/realm-java
+      realm/realm-dotnet
+      realm/realm-swift
+      realm/realm-dart
+      realm/realm-kotlin
+      realm/realm-core
+      realm/realm-studio
+      realm/test
+
+# Disabled check-changelog for:
+# realm-js until it can handle mono-repo structure
+
+  - files:
+      - source: synced-files/.github/workflows/check-changelog.yml
+        dest: .github/workflows/check-changelog.yml
+    repos: |
+      realm/realm-java
+      realm/realm-dotnet
+      realm/realm-swift
+      realm/realm-dart
+      realm/realm-kotlin
+      realm/realm-core
+      realm/realm-studio
+      realm/test
+
+  - files:
+      - source: synced-files/.github/ISSUE_TEMPLATE/feature.yml
+        dest: .github/ISSUE_TEMPLATE/feature.yml
+    repos: |
+      realm/realm-js
+      realm/realm-java
+      realm/realm-dotnet
+      realm/realm-swift
+      realm/realm-dart
+ 
+# Don't use issue forms yet
+# realm/realm-kotlin
+# realm/realm-core
+# realm/realm-studio

@@ -19,7 +19,7 @@ inputs:
     description: The private API key.
   clusterName:
     required: false
-    description: Provide a specific name of cluster that to be created.
+    description: Provide a specific name of cluster that to be deleted. If not provided, one will be generated based on the `github.run_id` and `github.run_attempt`.
   clusterSize:
     required: false
     description: Provide a specific size of the cluster to be created. Default is M5.

@@ -1,5 +1,5 @@
-name: deleteAllClusters
-description: Deletes all BaaS apps and Atlas clusters in a project
+name: cleanup
+description: Deletes an Atlas cluster and all BaaS apps associated with it
 author: Realm
 inputs:
   atlasUrl:
@@ -17,6 +17,9 @@ inputs:
   privateapiKey:
     required: true
     description: The private API key.
+  clusterName:
+    required: false
+    description: Provide a specific name of cluster that to be deleted. If not provided, one will be generated based on the `github.run_id` and `github.run_attempt`.
 runs:
   using: node16
   main: ../dist/cleanup/index.js
