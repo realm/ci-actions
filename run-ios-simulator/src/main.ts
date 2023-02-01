@@ -18,7 +18,7 @@ async function run(): Promise<void> {
         // and we want to extract "iOS 14.5" and "com.apple.CoreSimulator.SimRuntime.iOS-14-5"
         // If we want to allow launching watchOS/tvOS simulators, replace the 'iOS' with an 'os' argument
         const matches = new RegExp(
-            `(?<runtime1>${os} \d{1,2}(.\d{1,2})?).*(?<runtime2>com\.apple\.CoreSimulator\.SimRuntime\.${os}-[0-9.-]+)`,
+            `(?<runtime1>${os} \\d{1,2}(.\\d{1,2})?).*(?<runtime2>com\\.apple\\.CoreSimulator\\.SimRuntime\\.${os}-[0-9.-]+)`,
             "g"
         ).exec(runtimeId);
         if (!matches?.groups?.runtime1 || !matches?.groups?.runtime2) {
