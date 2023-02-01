@@ -4174,11 +4174,12 @@ async function run() {
         const bundleId = core.getInput("bundleId", { required: true });
         const iphoneToSimulate = core.getInput("iphoneToSimulate", { required: false });
         const args = core.getInput("arguments", { required: false });
+        const os = core.getInput("os", { required: false }) || "iOS";
         let runtimeId = await execCmd("xcrun simctl list runtimes");
         // Sample output: iOS 14.5 (14.5 - 18E182) - com.apple.CoreSimulator.SimRuntime.iOS-14-5
         // and we want to extract "iOS 14.5" and "com.apple.CoreSimulator.SimRuntime.iOS-14-5"
         // If we want to allow launching watchOS/tvOS simulators, replace the 'iOS' with an 'os' argument
-        const matches = /(?<runtime1>iOS \d{1,2}(.\d{1,2})?).*(?<runtime2>com\.apple\.CoreSimulator\.SimRuntime\.iOS-[0-9.-]+)/g.exec(runtimeId);
+        const matches = new RegExp(`(?<runtime1>${os} \\d{1,2}(.\\d{1,2})?).*(?<runtime2>com\\.apple\\.CoreSimulator\\.SimRuntime\\.${os}-[0-9.-]+)`, "g").exec(runtimeId);
         if (!matches?.groups?.runtime1 || !matches?.groups?.runtime2) {
             core.setFailed(`Impossible to fetch a runtime. Check runtimes and retry.\n${runtimeId}`);
             return;
@@ -4211,7 +4212,7 @@ async function execCmd(cmd) {
         },
         stderr: (data) => {
             stderr += data.toString();
-        }
+        },
     };
     const exitCode = await exec.exec(cmd, [], options);
     if (exitCode != 0) {
