@@ -102,20 +102,32 @@ async function waitForClusterDeployment(config: EnvironmentConfig): Promise<void
     throw new Error(`Cluster failed to deploy after ${100 * pollDelay} seconds`);
 }
 
-export async function deleteApps(config: EnvironmentConfig, deleteAll = false): Promise<void> {
+type App = {
+    _id: string;
+    name: string;
+    client_app_id: string;
+    last_used: number;
+    // and more ...
+};
+
+/**
+ * @see https://www.mongodb.com/docs/atlas/app-services/admin/api/v3/#tag/apps/operation/adminListApplications
+ */
+async function listApps(config: EnvironmentConfig): Promise<App[]> {
+    const accessToken = await authenticate(config);
+    return await execRealmRequest("GET", "apps", accessToken, config);
+}
+
+export async function deleteApps(config: EnvironmentConfig, filter: (app: App) => boolean): Promise<void> {
     const accessToken = await authenticate(config);
 
-    const listResponse = await execRealmRequest("GET", "apps", accessToken, config);
-    const allApps = (listResponse as any[])
-        .map(a => {
-            return { name: a.name, id: a._id };
-        })
-        .filter(a => deleteAll || a.name.includes(config.clusterName));
+    const apps = await listApps(config);
+    const appsToDelete = apps.filter(filter);
 
-    for (const app of allApps) {
+    for (const app of appsToDelete) {
         try {
             core.info(`Deleting ${app.name}`);
-            await execRealmRequest("DELETE", `apps/${app.id}`, accessToken, config);
+            await execRealmRequest("DELETE", `apps/${app._id}`, accessToken, config);
             core.info(`Deleted ${app.name}`);
         } catch (error: any) {
             core.warning(`Failed to delete ${app.name}: ${error.message}`);

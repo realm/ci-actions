@@ -63395,7 +63395,7 @@ function run() {
         try {
             const config = (0, helpers_1.getConfig)();
             try {
-                yield (0, helpers_1.deleteApps)(config);
+                yield (0, helpers_1.deleteApps)(config, app => app.name.includes(config.clusterName));
             }
             catch (error) {
                 core.warning(`Failed to delete applications: ${error.message}`);
@@ -63546,19 +63546,24 @@ function waitForClusterDeployment(config) {
         throw new Error(`Cluster failed to deploy after ${100 * pollDelay} seconds`);
     });
 }
-function deleteApps(config, deleteAll = false) {
+/**
+ * @see https://www.mongodb.com/docs/atlas/app-services/admin/api/v3/#tag/apps/operation/adminListApplications
+ */
+function listApps(config) {
     return __awaiter(this, void 0, void 0, function* () {
         const accessToken = yield authenticate(config);
-        const listResponse = yield execRealmRequest("GET", "apps", accessToken, config);
-        const allApps = listResponse
-            .map(a => {
-            return { name: a.name, id: a._id };
-        })
-            .filter(a => deleteAll || a.name.includes(config.clusterName));
-        for (const app of allApps) {
+        return yield execRealmRequest("GET", "apps", accessToken, config);
+    });
+}
+function deleteApps(config, filter) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const accessToken = yield authenticate(config);
+        const apps = yield listApps(config);
+        const appsToDelete = apps.filter(filter);
+        for (const app of appsToDelete) {
             try {
                 core.info(`Deleting ${app.name}`);
-                yield execRealmRequest("DELETE", `apps/${app.id}`, accessToken, config);
+                yield execRealmRequest("DELETE", `apps/${app._id}`, accessToken, config);
                 core.info(`Deleted ${app.name}`);
             }
             catch (error) {

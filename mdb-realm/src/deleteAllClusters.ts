@@ -6,7 +6,7 @@ async function run(): Promise<void> {
         const config = getConfig();
 
         try {
-            await deleteApps(config, /* deleteAll */ true);
+            await deleteApps(config, /* deleteAll */ () => true);
         } catch (error: any) {
             core.warning(`Failed to delete applications: ${error.message}`);
         }

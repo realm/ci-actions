@@ -31,7 +31,7 @@ class helpersTests {
     async cleanup(): Promise<void> {
         const config = this.getConfig();
 
-        await deleteApps(config);
+        await deleteApps(config, app => app.name.includes(config.clusterName));
 
         await deleteCluster(config);
     }
@@ -48,7 +48,7 @@ class helpersTests {
     @timeout(60000)
     async deleteAllApps(): Promise<void> {
         const config = this.getConfig();
-        await deleteApps(config, true);
+        await deleteApps(config, () => true);
     }
 
     @test.skip

@@ -6,7 +6,7 @@ async function run(): Promise<void> {
         const config = getConfig();
 
         try {
-            await deleteApps(config);
+            await deleteApps(config, app => app.name.includes(config.clusterName));
         } catch (error: any) {
             core.warning(`Failed to delete applications: ${error.message}`);
         }
