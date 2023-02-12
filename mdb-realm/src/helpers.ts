@@ -145,6 +145,7 @@ async function execRequest(
     const request: urllib.RequestOptions = {
         digestAuth,
         method,
+        timeout: 60000,
         headers: {
             "content-type": "application/json",
             accept: "application/json",
