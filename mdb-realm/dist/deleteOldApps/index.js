@@ -63397,9 +63397,9 @@ function run() {
             try {
                 const now = Date.now();
                 // The `last_used` on app is unix time in seconds
-                const yesterday = (now - 24 * 60 * 60 * 1000) / 1000;
+                const oneHourAgo = (now - 60 * 60 * 1000) / 1000;
                 yield (0, helpers_1.deleteApps)(config, app => {
-                    return app.last_used < yesterday;
+                    return app.last_used < oneHourAgo;
                 });
             }
             catch (error) {
