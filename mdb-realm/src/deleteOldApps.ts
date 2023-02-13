@@ -10,7 +10,7 @@ async function run(): Promise<void> {
             // The `last_used` on app is unix time in seconds
             const oneHourAgo = (now - 60 * 60 * 1000) / 1000;
             await deleteApps(config, app => {
-                return app.last_used < oneHourAgo;
+                return app.last_modified < oneHourAgo;
             });
         } catch (error: any) {
             core.warning(`Failed to delete applications: ${error.message}`);

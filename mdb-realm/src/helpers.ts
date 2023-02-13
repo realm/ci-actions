@@ -106,6 +106,7 @@ type App = {
     _id: string;
     name: string;
     client_app_id: string;
+    last_modified: number;
     last_used: number;
     // and more ...
 };
