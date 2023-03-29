@@ -57,11 +57,11 @@ group:
     repos: |
       realm/realm-js
       realm/realm-java
+      realm/realm-kotlin
       realm/realm-dotnet
       realm/realm-swift
       realm/realm-dart
  
 # Don't use issue forms yet
-# realm/realm-kotlin
 # realm/realm-core
 # realm/realm-studio
