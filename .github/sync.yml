@@ -37,7 +37,6 @@ group:
       realm/test
 
 # Core doesn't have issue forms yet, so don't need the issue-labeler
-group:
   - files:
       - source: synced-files/LICENSE
         dest: LICENSE
