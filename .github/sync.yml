@@ -33,13 +33,29 @@ group:
       realm/realm-swift
       realm/realm-dart
       realm/realm-kotlin
-      realm/realm-core
       realm/realm-studio
       realm/test
+
+# Core doesn't have issue forms yet, so don't need the issue-labeler
+group:
+  - files:
+      - source: synced-files/LICENSE
+        dest: LICENSE
+      - source: synced-files/.github/workflows/Issue-Needs-Attention.yml
+        dest: .github/workflows/Issue-Needs-Attention.yml
+      - source: synced-files/.github/workflows/no-response.yml
+        dest: .github/workflows/no-response.yml
+      - source: synced-files/.github/workflows/auto-assign.yml
+        dest: .github/workflows/auto-assign.yml
+      - source: synced-files/.github/auto_assign.yml
+        dest: .github/auto_assign.yml
+    repos: |
+      realm/realm-core
 
 # Disabled check-changelog for:
 # realm-js until it can handle mono-repo structure
 # realm-kotlin/realm-java it is not needed
+# realm/realm-core prefer to not have it
   - files:
       - source: synced-files/.github/workflows/check-changelog.yml
         dest: .github/workflows/check-changelog.yml
@@ -47,10 +63,13 @@ group:
       realm/realm-dotnet
       realm/realm-swift
       realm/realm-dart
-      realm/realm-core
       realm/realm-studio
       realm/test
 
+# Don't use issue forms yet:
+# realm/realm-kotlin
+# realm/realm-core
+# realm/realm-studio
   - files:
       - source: synced-files/.github/ISSUE_TEMPLATE/feature.yml
         dest: .github/ISSUE_TEMPLATE/feature.yml
@@ -61,7 +80,3 @@ group:
       realm/realm-swift
       realm/realm-dart
  
-# Don't use issue forms yet
-# realm/realm-kotlin
-# realm/realm-core
-# realm/realm-studio
