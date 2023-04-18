@@ -11,13 +11,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getPayload = void 0;
+exports.getFallbackPayload = exports.getPayload = void 0;
 const slackify_markdown_1 = __importDefault(__webpack_require__(9418));
 const moment_1 = __importDefault(__webpack_require__(9623));
 const sectionsRegex = /### (?<sectionName>[^\r\n]*)(?<sectionContent>.+?(?=###|$))/gs;
 function getPayload(changelog, sdk, repoUrl, version) {
     sectionsRegex.lastIndex = 0;
-    const date = (0, moment_1.default)().format("YYYY-MM-DD");
     const slackSections = new Array();
     let sectionMatch;
     while ((sectionMatch = sectionsRegex.exec(changelog))) {
@@ -26,14 +25,24 @@ function getPayload(changelog, sdk, repoUrl, version) {
         }
         slackSections.push({ title: sectionMatch.groups["sectionName"], text: sectionMatch.groups["sectionContent"] });
     }
+    return getPayloadCore(sdk, repoUrl, version, slackSections);
+}
+exports.getPayload = getPayload;
+function getFallbackPayload(sdk, repoUrl, version) {
+    return getPayloadCore(sdk, repoUrl, version, [
+        { title: "Changelog", text: "Please see the release page for full details." },
+    ]);
+}
+exports.getFallbackPayload = getFallbackPayload;
+function getPayloadCore(sdk, repoUrl, version, sections) {
+    const date = (0, moment_1.default)().format("YYYY-MM-DD");
     const releaseUrl = `${repoUrl}/releases/tag/${version}`;
     const slackPayload = new SlackPayload(`Realm ${sdk} ${version}`, `*${date}* | <${releaseUrl}|${sdk} SDK Release>`);
-    for (const section of slackSections) {
+    for (const section of sections) {
         slackPayload.addSection(section.title, section.text);
     }
     return slackPayload;
 }
-exports.getPayload = getPayload;
 class SlackPayload {
     constructor(header, context) {
         this.username = "Realm CI";
@@ -146,7 +155,13 @@ function run() {
             const repoUrl = `${github.context.serverUrl}/${github.context.repo.owner}/${github.context.repo.repo}`;
             const result = (0, helpers_1.getPayload)(fs.readFileSync(changelogPath, { encoding: "utf8" }), sdk, repoUrl, version);
             const client = new http.HttpClient();
-            yield client.postJson(webhookUrl, result);
+            try {
+                yield client.postJson(webhookUrl, result);
+            }
+            catch (blocksErr) {
+                core.warning(`Failed to post to Slack: ${blocksErr.message}`);
+                yield client.postJson(webhookUrl, (0, helpers_1.getFallbackPayload)(sdk, repoUrl, version));
+            }
         }
         catch (error) {
             core.setFailed(`${error.message}: ${error.stack}`);
