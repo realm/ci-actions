@@ -3,7 +3,7 @@ import * as github from "@actions/github";
 import * as http from "@actions/http-client";
 
 import * as fs from "fs";
-import { getPayload } from "./helpers";
+import { getPayload, getFallbackPayload } from "./helpers";
 
 async function run(): Promise<void> {
     try {
@@ -21,7 +21,13 @@ async function run(): Promise<void> {
         const result = getPayload(fs.readFileSync(changelogPath, { encoding: "utf8" }), sdk, repoUrl, version);
 
         const client = new http.HttpClient();
-        await client.postJson(webhookUrl, result);
+        try {
+            await client.postJson(webhookUrl, result);
+        } catch (blocksErr: any) {
+            core.warning(`Failed to post to Slack: ${blocksErr.message}`);
+
+            await client.postJson(webhookUrl, getFallbackPayload(sdk, repoUrl, version));
+        }
     } catch (error: any) {
         core.setFailed(`${error.message}: ${error.stack}`);
     }

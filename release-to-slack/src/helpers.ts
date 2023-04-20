@@ -6,8 +6,6 @@ const sectionsRegex = /### (?<sectionName>[^\r\n]*)(?<sectionContent>.+?(?=###|$
 export function getPayload(changelog: string, sdk: string, repoUrl: string, version: string): SlackPayload {
     sectionsRegex.lastIndex = 0;
 
-    const date = moment().format("YYYY-MM-DD");
-
     const slackSections = new Array<{ title: string; text: string }>();
 
     let sectionMatch: RegExpExecArray | null;
@@ -19,9 +17,25 @@ export function getPayload(changelog: string, sdk: string, repoUrl: string, vers
         slackSections.push({ title: sectionMatch.groups["sectionName"], text: sectionMatch.groups["sectionContent"] });
     }
 
+    return getPayloadCore(sdk, repoUrl, version, slackSections);
+}
+
+export function getFallbackPayload(sdk: string, repoUrl: string, version: string): SlackPayload {
+    return getPayloadCore(sdk, repoUrl, version, [
+        { title: "Changelog", text: "Please see the release page for full details." },
+    ]);
+}
+
+function getPayloadCore(
+    sdk: string,
+    repoUrl: string,
+    version: string,
+    sections: { title: string; text: string }[],
+): SlackPayload {
+    const date = moment().format("YYYY-MM-DD");
     const releaseUrl = `${repoUrl}/releases/tag/${version}`;
     const slackPayload = new SlackPayload(`Realm ${sdk} ${version}`, `*${date}* | <${releaseUrl}|${sdk} SDK Release>`);
-    for (const section of slackSections) {
+    for (const section of sections) {
         slackPayload.addSection(section.title, section.text);
     }
 
