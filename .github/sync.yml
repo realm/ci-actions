@@ -75,6 +75,7 @@ group:
     repos: |
       realm/realm-js
       realm/realm-java
+      realm/realm-kotlin
       realm/realm-dotnet
       realm/realm-swift
       realm/realm-dart
