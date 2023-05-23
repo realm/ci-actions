@@ -14,7 +14,7 @@ inputs:
   apiKey:
     required: true
     description: The public API key.
-  privateapiKey:
+  privateApiKey:
     required: true
     description: The private API key.
 runs:
