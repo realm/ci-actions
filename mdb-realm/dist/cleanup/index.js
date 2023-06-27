@@ -63574,6 +63574,7 @@ function execRequest(url, method, payload, digestAuth, headers = {}) {
             digestAuth,
             method,
             headers: Object.assign({ "content-type": "application/json", accept: "application/json" }, headers),
+            timeout: 60000,
         };
         if (payload) {
             request.data = JSON.stringify(payload);

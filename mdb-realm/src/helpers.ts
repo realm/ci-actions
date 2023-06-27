@@ -138,6 +138,7 @@ async function execRequest(
             accept: "application/json",
             ...headers,
         },
+        timeout: 60000,
     };
 
     if (payload) {
