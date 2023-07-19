@@ -17,7 +17,7 @@ describe("parseReleaseTag", () => {
         const parsedPrereleaseReleaseTag = parseReleaseTag(prereleaseReleaseTag);
         expect(parsedPrereleaseReleaseTag).deep.equal({
             packageName: "my-package",
-            packageVersion: "1.0.0-alpha.1",
+            packageVersion: "1.0.0",
             packageVersionSuffix: "-alpha.1",
             prerelease: true,
         });
@@ -35,7 +35,7 @@ describe("parseReleaseTag", () => {
         const parsedReleaseTagWithoutPackageWithSuffix = parseReleaseTag(releaseTagWithoutPackageWithSuffix);
         expect(parsedReleaseTagWithoutPackageWithSuffix).deep.equal({
             packageName: undefined,
-            packageVersion: "1.0.0-alpha.1",
+            packageVersion: "1.0.0",
             packageVersionSuffix: "-alpha.1",
             prerelease: true,
         });

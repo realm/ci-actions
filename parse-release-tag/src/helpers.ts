@@ -6,7 +6,7 @@ type ParsedReleaseTag = {
 };
 
 export function parseReleaseTag(releaseTag: string): ParsedReleaseTag {
-    const releaseTagRegex = /(([a-zA-Z-]*[a-zA-Z])-)?v([0-9]+\.[0-9]+\.[0-9]+(-\S+)?)/;
+    const releaseTagRegex = /(([a-zA-Z-]*[a-zA-Z])-)?v([0-9]+\.[0-9]+\.[0-9])+(-\S+)?/;
     const result = releaseTagRegex.exec(releaseTag);
     if (!result) {
         throw new Error(`Invalid release tag: ${releaseTag}`);

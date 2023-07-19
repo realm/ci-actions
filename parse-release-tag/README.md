@@ -3,15 +3,15 @@
 This action will take a release tag string as input and produce the following output:
 
 1. `package-name`: the name of the package, if set.
-2. `package-version`: the version string that was published (10.9.8) or (8.9.10-alpha).
-3. `package-version-suffix`: the suffix part of the package-version.
+2. `package-version`: the version string (10.9.8).
+3. `package-version-suffix`: the prerelease suffix of the version tag
 4. `prerelease`: set to `true` if a version suffix (`-<something>`) is appended to the tag.
 ```
 
 For example, the tag "my-package-v42.0.0-alpha.1 would return:
 ```
   package-name: "my-package",
-  package-version: "42.0.0-alpha.1"
+  package-version: "42.0.0"
   package-version-suffix: "-alpha.1"
   prerelease: true
 ```
