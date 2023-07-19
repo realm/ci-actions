@@ -1,75 +1,6 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 433:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseReleaseTag = void 0;
-function parseReleaseTag(releaseTag) {
-    const releaseTagRegex = /(([a-zA-Z-]*[a-zA-Z])-)?v([0-9]+\.[0-9]+\.[0-9]+(-\S+)?)/;
-    const result = releaseTagRegex.exec(releaseTag);
-    if (!result) {
-        throw new Error(`Invalid release tag: ${releaseTag}`);
-    }
-    const packageName = result[2];
-    const packageVersion = result[3];
-    const packageVersionSuffix = result[4];
-    return {
-        packageName,
-        packageVersion,
-        packageVersionSuffix,
-        prerelease: packageVersionSuffix !== undefined,
-    };
-}
-exports.parseReleaseTag = parseReleaseTag;
-
-
-/***/ }),
-
-/***/ 536:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core_1 = __importDefault(__nccwpck_require__(186));
-const helpers_1 = __nccwpck_require__(433);
-function run() {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const releaseTag = core_1.default.getInput("releaseTag");
-            const parsedReleaseTag = (0, helpers_1.parseReleaseTag)(releaseTag);
-            console.log(parsedReleaseTag);
-            console.log(`::set-output name=package-name::${parsedReleaseTag.packageName}`);
-            console.log(`::set-output name=package-version::${parsedReleaseTag.packageVersion}`);
-            console.log(`::set-output name=package-version-suffix::${parsedReleaseTag.packageVersionSuffix}`);
-            console.log(`::set-output name=prerelease::${parsedReleaseTag.prerelease}`);
-        }
-        catch (error) {
-            core_1.default.setFailed(`An unexpected error occurred: ${error.message}\n${error.stack}`);
-        }
-    });
-}
-run();
-
-
-/***/ }),
-
 /***/ 351:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -2757,6 +2688,95 @@ exports["default"] = _default;
 
 /***/ }),
 
+/***/ 15:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.parseReleaseTag = void 0;
+function parseReleaseTag(releaseTag) {
+    var _a;
+    const releaseTagRegex = /(([a-zA-Z-]*[a-zA-Z])-)?v([0-9]+\.[0-9]+\.[0-9])+(-\S+)?/;
+    const result = releaseTagRegex.exec(releaseTag);
+    if (!result) {
+        throw new Error(`Invalid release tag: ${releaseTag}`);
+    }
+    const packageName = (_a = result[2]) !== null && _a !== void 0 ? _a : "realm";
+    const packageVersion = result[3];
+    const packageVersionSuffix = result[4];
+    return {
+        packageName,
+        packageVersion,
+        packageVersionSuffix,
+        prerelease: packageVersionSuffix !== undefined,
+    };
+}
+exports.parseReleaseTag = parseReleaseTag;
+
+
+/***/ }),
+
+/***/ 399:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core = __importStar(__nccwpck_require__(186));
+const helpers_1 = __nccwpck_require__(15);
+function run() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const releaseTag = core.getInput("release-tag");
+            const parsedReleaseTag = (0, helpers_1.parseReleaseTag)(releaseTag);
+            core.setOutput("package-name", parsedReleaseTag.packageName);
+            core.setOutput("package-version", parsedReleaseTag.packageVersion);
+            core.setOutput("package-version-suffix", parsedReleaseTag.packageVersionSuffix);
+            core.setOutput("prerelease", parsedReleaseTag.prerelease);
+        }
+        catch (error) {
+            core.setFailed(`An unexpected error occurred: ${error.message}\n${error.stack}`);
+        }
+    });
+}
+run();
+
+
+/***/ }),
+
 /***/ 491:
 /***/ ((module) => {
 
@@ -2887,7 +2907,7 @@ module.exports = require("util");
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(536);
+/******/ 	var __webpack_exports__ = __nccwpck_require__(399);
 /******/ 	module.exports = __webpack_exports__;
 /******/ 	
 /******/ })()

@@ -25,7 +25,7 @@ describe("parseReleaseTag", () => {
         const releaseTagWithoutPackage = "v1.0.0";
         const parsedReleaseTagWithoutPackage = parseReleaseTag(releaseTagWithoutPackage);
         expect(parsedReleaseTagWithoutPackage).deep.equal({
-            packageName: undefined,
+            packageName: "realm",
             packageVersion: "1.0.0",
             packageVersionSuffix: undefined,
             prerelease: false,
@@ -34,7 +34,7 @@ describe("parseReleaseTag", () => {
         const releaseTagWithoutPackageWithSuffix = "v1.0.0-alpha.1";
         const parsedReleaseTagWithoutPackageWithSuffix = parseReleaseTag(releaseTagWithoutPackageWithSuffix);
         expect(parsedReleaseTagWithoutPackageWithSuffix).deep.equal({
-            packageName: undefined,
+            packageName: "realm",
             packageVersion: "1.0.0",
             packageVersionSuffix: "-alpha.1",
             prerelease: true,

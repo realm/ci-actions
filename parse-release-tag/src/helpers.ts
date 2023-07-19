@@ -11,7 +11,7 @@ export function parseReleaseTag(releaseTag: string): ParsedReleaseTag {
     if (!result) {
         throw new Error(`Invalid release tag: ${releaseTag}`);
     }
-    const packageName = result[2];
+    const packageName = result[2] ?? "realm";
     const packageVersion = result[3];
     const packageVersionSuffix = result[4];
 

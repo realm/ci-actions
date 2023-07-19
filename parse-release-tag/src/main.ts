@@ -1,9 +1,9 @@
-import core from "@actions/core";
+import * as core from "@actions/core";
 import { parseReleaseTag } from "./helpers";
 
 async function run(): Promise<void> {
     try {
-        const releaseTag = core.getInput("releaseTag");
+        const releaseTag = core.getInput("release-tag");
         const parsedReleaseTag = parseReleaseTag(releaseTag);
 
         core.setOutput("package-name", parsedReleaseTag.packageName);

@@ -2,13 +2,12 @@
   "name": "parse-release-tag",
   "version": "0.0.1",
   "description": "Parse a release tag into its components",
-  "main": "lib/src/main.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "ncc build ./src/main.ts --source-map --license licenses.txt",
     "format": "prettier --write src/**/*.ts",
     "format-check": "prettier --check src/**/*.ts",
-    "lint": "eslint src/**/*.ts",
-    "package": "ncc build --source-map --license licenses.txt",
+    "lint": "eslint src/**/*.ts && npx tsc --noEmit",
     "test": "mocha -r ts-node/register '__tests__/**/*.ts'",
     "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
