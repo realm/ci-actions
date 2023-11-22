@@ -63,7 +63,6 @@ group:
       realm/realm-dotnet
       realm/realm-swift
       realm/realm-dart
-      realm/realm-studio
       realm/test
 
 # Don't use issue forms yet:
