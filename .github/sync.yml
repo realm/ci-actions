@@ -53,6 +53,7 @@ group:
 
 # Disabled check-changelog for:
 # realm-js until it can handle mono-repo structure
+# realm-studio as it uses a separate RELEASENOTES.md
 # realm-kotlin/realm-java it is not needed
 # realm/realm-core prefer to not have it
   - files:
