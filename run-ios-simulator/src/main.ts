@@ -1,6 +1,7 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import { v4 as uuidv4 } from "uuid";
+import * as semver from "semver";
 
 async function run(): Promise<void> {
     const id = uuidv4();
@@ -12,31 +13,21 @@ async function run(): Promise<void> {
         const args = core.getInput("arguments", { required: false });
         const os = core.getInput("os", { required: false }) || "iOS";
 
-        let runtimeId = await execCmd("xcrun simctl list runtimes");
+        const runtimes = await execCmd("xcrun simctl list runtimes");
 
-        // Sample output: iOS 14.5 (14.5 - 18E182) - com.apple.CoreSimulator.SimRuntime.iOS-14-5
-        // and we want to extract "iOS 14.5" and "com.apple.CoreSimulator.SimRuntime.iOS-14-5"
-        // If we want to allow launching watchOS/tvOS simulators, replace the 'iOS' with an 'os' argument
-        const matches = new RegExp(
-            `(?<runtime1>${os} \\d{1,2}(.\\d{1,2})?).*(?<runtime2>com\\.apple\\.CoreSimulator\\.SimRuntime\\.${os}-[0-9.-]+)`,
-            "g"
-        ).exec(runtimeId);
-        if (!matches?.groups?.runtime1 || !matches?.groups?.runtime2) {
-            core.setFailed(`Impossible to fetch a runtime. Check runtimes and retry.\n${runtimeId}`);
-            return;
-        }
-        core.info(`runtimeId: ${runtimeId}`);
+        const newestRuntime = getNewestRuntime(runtimes, os);
 
         try {
-            runtimeId = matches.groups.runtime1.replace(" ", "");
             await execCmd(
-                `xcrun simctl create ${id} com.apple.CoreSimulator.SimDeviceType.${iphoneToSimulate} ${runtimeId}`
+                `xcrun simctl create ${id} com.apple.CoreSimulator.SimDeviceType.${iphoneToSimulate} ${newestRuntime.runtime.replace(
+                    " ",
+                    ""
+                )}`
             );
         } catch {
             // Different combinantions of xcode and macOS versions have shown different syntax acceptance about the runtime, therefore 1 last attempt with a different syntax.
-            runtimeId = matches.groups.runtime2;
             await execCmd(
-                `xcrun simctl create ${id} com.apple.CoreSimulator.SimDeviceType.${iphoneToSimulate} ${runtimeId}`
+                `xcrun simctl create ${id} com.apple.CoreSimulator.SimDeviceType.${iphoneToSimulate} ${newestRuntime.runtimeFallback}`
             );
         }
 
@@ -48,15 +39,61 @@ async function run(): Promise<void> {
     }
 }
 
+function getNewestRuntime(runtimes: string, os: string): { runtime: string; runtimeFallback: string } {
+    // Sample output: iOS 14.5 (14.5 - 18E182) - com.apple.CoreSimulator.SimRuntime.iOS-14-5
+    // and we want to extract "iOS 14.5" and "com.apple.CoreSimulator.SimRuntime.iOS-14-5"
+    const matches = runtimes.matchAll(
+        new RegExp(
+            `(?<runtime1>${os} \\d{1,2}(.\\d{1,2})?).*(?<runtime2>com\\.apple\\.CoreSimulator\\.SimRuntime\\.${os}-[0-9.-]+)`,
+            "g"
+        )
+    );
+
+    let newestRuntime: { runtime: string; runtimeFallback: string } | undefined = undefined;
+
+    for (const match of matches) {
+        const currentRuntime = match.groups?.runtime1;
+        if (!currentRuntime) {
+            continue;
+        }
+
+        if (!newestRuntime || isRuntimeNewer(currentRuntime, newestRuntime.runtime)) {
+            newestRuntime = { runtime: currentRuntime, runtimeFallback: match.groups!.runtime2 };
+        }
+    }
+
+    if (!newestRuntime) {
+        throw new Error(`Impossible to fetch a runtime. Check runtimes and retry.\n${runtimes}`);
+    }
+
+    return newestRuntime;
+}
+
+function isRuntimeNewer(first: string, second: string): boolean {
+    const extractVersion = (runtime: string): string => {
+        let extractedVersion = runtime.split(" ").pop()!;
+        const components = extractedVersion.split(".").length;
+        extractedVersion = extractedVersion.concat(...Array.from({ length: 3 - components}, _ => ".0"));
+
+        if (!semver.valid(extractedVersion)) {
+            throw new Error(`Couldn't extract version for runtime ${runtime}`);
+        }
+
+        return extractedVersion;
+    };
+
+    return semver.gt(extractVersion(first), extractVersion(second));
+}
+
 async function execCmd(cmd: string): Promise<string> {
     let stdout = "";
     let stderr = "";
     const options: exec.ExecOptions = {};
     options.listeners = {
-        stdout: (data: Buffer) => {
+        stdout: (data: Buffer): void => {
             stdout += data.toString();
         },
-        stderr: (data: Buffer) => {
+        stderr: (data: Buffer): void => {
             stderr += data.toString();
         },
     };
