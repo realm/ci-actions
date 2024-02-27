@@ -7495,14 +7495,13 @@ function getNewestRuntime(runtimes, os) {
 }
 function isRuntimeNewer(first, second) {
     const extractVersion = (runtime) => {
-        if (semver.valid(runtime)) {
-            return runtime;
-        }
-        const extractedSemver = runtime.split(" ").pop();
-        if (!semver.valid(extractedSemver)) {
+        let extractedVersion = runtime.split(" ").pop();
+        const components = extractedVersion.split(".").length;
+        extractedVersion = extractedVersion.concat(...Array.from({ length: 3 - components }, _ => ".0"));
+        if (!semver.valid(extractedVersion)) {
             throw new Error(`Couldn't extract version for runtime ${runtime}`);
         }
-        return extractedSemver;
+        return extractedVersion;
     };
     return semver.gt(extractVersion(first), extractVersion(second));
 }

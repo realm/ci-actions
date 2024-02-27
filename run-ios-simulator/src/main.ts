@@ -71,16 +71,15 @@ function getNewestRuntime(runtimes: string, os: string): { runtime: string; runt
 
 function isRuntimeNewer(first: string, second: string): boolean {
     const extractVersion = (runtime: string): string => {
-        if (semver.valid(runtime)) {
-            return runtime;
-        }
+        let extractedVersion = runtime.split(" ").pop()!;
+        const components = extractedVersion.split(".").length;
+        extractedVersion = extractedVersion.concat(...Array.from({ length: 3 - components}, _ => ".0"));
 
-        const extractedSemver = runtime.split(" ").pop();
-        if (!semver.valid(extractedSemver)) {
+        if (!semver.valid(extractedVersion)) {
             throw new Error(`Couldn't extract version for runtime ${runtime}`);
         }
 
-        return extractedSemver!;
+        return extractedVersion;
     };
 
     return semver.gt(extractVersion(first), extractVersion(second));
