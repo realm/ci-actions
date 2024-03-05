@@ -20,7 +20,7 @@ parserOptions:
   ecmaVersion: 2023
   sourceType: module
   project:
-    - './.github/linters/tsconfig.json'
+    - './tsconfig-lint.json'
     - './tsconfig.json'
 
 plugins:

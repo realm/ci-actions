@@ -24,9 +24,9 @@ export async function run(): Promise<void> {
       .getInput('ignore-labels', { required: false })
       .split(',')
 
-    for (let label of labels) {
-      for (let ignoreLabel of ignoreLabels) {
-        if (label == ignoreLabel) {
+    for (const label of labels) {
+      for (const ignoreLabel of ignoreLabels) {
+        if (label === ignoreLabel) {
           core.info(`Skipping title check because PR has label: '${label}'.`)
           return
         }
