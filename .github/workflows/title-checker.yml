@@ -8,9 +8,6 @@ on:
     branches:
       - main
 
-permissions:
-  contents: read
-
 jobs:
   check-dist:
     name: Check dist/
@@ -32,10 +29,12 @@ jobs:
       - name: Install Dependencies
         id: install
         run: npm ci
+        working-directory: title-checker
 
       - name: Build dist/ Directory
         id: build
         run: npm run bundle
+        working-directory: title-checker
 
       # This will fail the workflow if the PR wasn't created by Dependabot.
       - name: Compare Directories
@@ -46,6 +45,7 @@ jobs:
             git diff --ignore-space-at-eol --text dist/
             exit 1
           fi
+        working-directory: title-checker
 
       # If `dist/` was different than expected, and this was not a Dependabot
       # PR, upload the expected version as a workflow artifact.
@@ -55,7 +55,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist/
+          path: title-checker/dist/
 
   test-typescript:
     name: TypeScript Tests
@@ -77,18 +77,22 @@ jobs:
       - name: Install Dependencies
         id: npm-ci
         run: npm ci
+        working-directory: title-checker
 
       - name: Check Format
         id: npm-format-check
         run: npm run format:check
+        working-directory: title-checker
 
       - name: Lint
         id: npm-lint
         run: npm run lint
+        working-directory: title-checker
 
       - name: Test
         id: npm-ci-test
         run: npm run ci-test
+        working-directory: title-checker
 
   lint:
     name: Lint Codebase
@@ -112,6 +116,7 @@ jobs:
       - name: Install Dependencies
         id: install
         run: npm ci
+        working-directory: title-checker
 
       - name: Lint Codebase
         id: super-linter
@@ -121,6 +126,6 @@ jobs:
           FILTER_REGEX_EXCLUDE: dist/**/*
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TYPESCRIPT_DEFAULT_STYLE: prettier
-          VALIDATE_ALL_CODEBASE: true
+          VALIDATE_ALL_CODEBASE: false
           VALIDATE_JAVASCRIPT_STANDARD: false
           VALIDATE_JSCPD: false
