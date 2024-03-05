@@ -26,7 +26,7 @@ export async function run(): Promise<void> {
 
     for (const label of labels) {
       for (const ignoreLabel of ignoreLabels) {
-        if (label === ignoreLabel) {
+        if (label.name === ignoreLabel) {
           core.info(`Skipping title check because PR has label: '${label}'.`)
           return
         }
