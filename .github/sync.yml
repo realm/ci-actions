@@ -26,6 +26,8 @@ group:
         dest: .github/advanced-issue-labeler.yml
       - source: synced-files/.github/workflows/issue-labeler.yml
         dest: .github/workflows/issue-labeler.yml
+      - source: synced-files/.github/workflows/check-pr-title.yml
+        dest: .github/workflows/check-pr-title.yml
     repos: |
       realm/realm-js
       realm/realm-java
@@ -79,4 +81,4 @@ group:
       realm/realm-dotnet
       realm/realm-swift
       realm/realm-dart
- 
+

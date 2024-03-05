@@ -1,0 +1,95 @@
+name: Title Checker CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+jobs:
+  check-dist:
+    name: Check dist/
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ./title-checker/.node-version
+          cache: npm
+          cache-dependency-path: ./title-checker/package-lock.json
+
+      - name: Install Dependencies
+        id: install
+        run: npm ci
+        working-directory: title-checker
+
+      - name: Build dist/ Directory
+        id: build
+        run: npm run bundle
+        working-directory: title-checker
+
+      # This will fail the workflow if the PR wasn't created by Dependabot.
+      - name: Compare Directories
+        id: diff
+        run: |
+          if [ "$(git diff --ignore-space-at-eol --text dist/ | wc -l)" -gt "0" ]; then
+            echo "Detected uncommitted changes after build. See status below:"
+            git diff --ignore-space-at-eol --text dist/
+            exit 1
+          fi
+        working-directory: title-checker
+
+      # If `dist/` was different than expected, and this was not a Dependabot
+      # PR, upload the expected version as a workflow artifact.
+      - if: ${{ failure() && steps.diff.outcome == 'failure' }}
+        name: Upload Artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: title-checker/dist/
+
+  test-typescript:
+    name: TypeScript Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        id: setup-node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ./title-checker/.node-version
+          cache: npm
+          cache-dependency-path: ./title-checker/package-lock.json
+
+      - name: Install Dependencies
+        id: npm-ci
+        run: npm ci
+        working-directory: title-checker
+
+      - name: Check Format
+        id: npm-format-check
+        run: npm run format:check
+        working-directory: title-checker
+
+      - name: Lint
+        id: npm-lint
+        run: npm run lint
+        working-directory: title-checker
+
+      - name: Test
+        id: npm-ci-test
+        run: npm run ci-test
+        working-directory: title-checker
