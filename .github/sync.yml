@@ -36,6 +36,7 @@ group:
       realm/realm-dart
       realm/realm-kotlin
       realm/realm-studio
+      realm/realm-cpp
       realm/test
 
 # Core doesn't have issue forms yet, so don't need the issue-labeler
@@ -65,6 +66,7 @@ group:
       realm/realm-dotnet
       realm/realm-swift
       realm/realm-dart
+      realm/realm-cpp
       realm/test
 
 # Don't use issue forms yet:
