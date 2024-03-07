@@ -49,7 +49,7 @@ cleanup-baas-my-test-target:
     - run-my-test-target
     if: always()
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - uses: realm/ci-actions/mdb-realm/cleanup@<COMMIT_SHA>
       with:
         projectId: ${{ secrets.ATLAS_PROJECT_ID }}

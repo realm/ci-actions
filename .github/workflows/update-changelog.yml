@@ -13,7 +13,7 @@ jobs:
       run:
         working-directory: update-changelog
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: |
           npm ci
           npm run all

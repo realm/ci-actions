@@ -12,12 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Run GitHub File Sync
         uses: BetaHuhn/repo-file-sync-action@475a6502288f55cc52e951bdd1c44d7981218478
         with:
           GH_PAT: ${{ secrets.REALM_CI_PAT }}
-          PR_LABELS: no-changelog
+          PR_LABELS: |
+            no-changelog
+            no-jira-ticket
           DRY_RUN: false
           GIT_USERNAME: realm-ci
           GIT_EMAIL: robot@realm.io
