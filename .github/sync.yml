@@ -51,6 +51,8 @@ group:
         dest: .github/workflows/auto-assign.yml
       - source: synced-files/.github/auto_assign.yml
         dest: .github/auto_assign.yml
+      - source: synced-files/.github/workflows/check-pr-title.yml
+        dest: .github/workflows/check-pr-title.yml
     repos: |
       realm/realm-core
 
@@ -83,4 +85,5 @@ group:
       realm/realm-dotnet
       realm/realm-swift
       realm/realm-dart
+      realm/realm-cpp
 
