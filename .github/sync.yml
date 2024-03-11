@@ -28,6 +28,8 @@ group:
         dest: .github/workflows/issue-labeler.yml
       - source: synced-files/.github/workflows/check-pr-title.yml
         dest: .github/workflows/check-pr-title.yml
+      - source: synced-files/.github/workflows/lock-threads.yml
+        dest: .github/workflows/lock-threads.yml
     repos: |
       realm/realm-js
       realm/realm-java
@@ -53,6 +55,8 @@ group:
         dest: .github/auto_assign.yml
       - source: synced-files/.github/workflows/check-pr-title.yml
         dest: .github/workflows/check-pr-title.yml
+      - source: synced-files/.github/workflows/lock-threads.yml
+        dest: .github/workflows/lock-threads.yml
     repos: |
       realm/realm-core
 
