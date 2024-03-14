@@ -1,0 +1,19 @@
+name: parse-release-tag
+description: Parse a release tag into its components
+author: Realm
+inputs:
+  release-tag:
+    required: true
+    description: release tag to parse of the format (<package-name>-v<x.y.z>-<suffix>)
+outputs:
+  package-name:
+    description: The name of the package
+  package-version:
+    description: The complete version string of the package, including the suffix if included
+  package-version-suffix:
+    description: The version suffix
+  prerelease:
+    description: Set to `true` if the version suffix is found
+runs:
+  using: node16
+  main: dist/index.js
