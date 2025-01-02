@@ -26,8 +26,6 @@ group:
         dest: .github/advanced-issue-labeler.yml
       - source: synced-files/.github/workflows/issue-labeler.yml
         dest: .github/workflows/issue-labeler.yml
-      - source: synced-files/.github/workflows/check-pr-title.yml
-        dest: .github/workflows/check-pr-title.yml
       - source: synced-files/.github/workflows/lock-threads.yml
         dest: .github/workflows/lock-threads.yml
     repos: |
@@ -53,8 +51,6 @@ group:
         dest: .github/workflows/auto-assign.yml
       - source: synced-files/.github/auto_assign.yml
         dest: .github/auto_assign.yml
-      - source: synced-files/.github/workflows/check-pr-title.yml
-        dest: .github/workflows/check-pr-title.yml
       - source: synced-files/.github/workflows/lock-threads.yml
         dest: .github/workflows/lock-threads.yml
     repos: |
